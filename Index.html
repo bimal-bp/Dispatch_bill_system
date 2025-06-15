@@ -40,6 +40,9 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             border-left: 4px solid #3498db;
         }
+        .kpi-box.ytd {
+            border-left-color: #e74c3c;
+        }
         .kpi-box h3 {
             margin-top: 0;
             color: #7f8c8d;
@@ -49,11 +52,6 @@
             font-size: 24px;
             font-weight: bold;
             color: #2c3e50;
-        }
-        .kpi-ytd {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-top: 5px;
         }
         .kpi-label {
             font-size: 12px;
@@ -111,41 +109,105 @@
             background-color: #ecf0f1;
             margin: 20px 0;
         }
-        .buttons-container {
+        .button-container {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
         }
-        button {
+        .button-container button {
             padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-weight: 600;
-            color: white;
         }
-        .vrm-btn { background-color: #2980b9; }
-        .dryer-btn { background-color: #e74c3c; }
-        .dispatch-btn { background-color: #27ae60; }
-        button:hover {
-            opacity: 0.9;
+        .button-container button:hover {
+            background-color: #2980b9;
         }
         .consumption-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .consumption-item {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .consumption-item h3 {
+            margin-top: 0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .consumption-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .consumption-label {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+        .customer-box {
             background-color: white;
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             margin-bottom: 20px;
         }
-        .consumption-box h3 {
+        .customer-box h3 {
             margin-top: 0;
             color: #2c3e50;
-            font-size: 16px;
         }
-        .consumption-value {
+        .customer-list {
+            display: flex;
+            gap: 20px;
+        }
+        .customer-item {
+            text-align: center;
+        }
+        .customer-count {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .customer-name {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        .raw-material-totals {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .raw-material-total {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .raw-material-total h4 {
+            margin: 0 0 5px 0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .raw-material-total .value {
             font-size: 20px;
             font-weight: bold;
             color: #2c3e50;
+        }
+        .raw-material-total .label {
+            font-size: 12px;
+            color: #95a5a6;
         }
     </style>
 </head>
@@ -158,10 +220,10 @@
         </div>
     </div>
 
-    <div class="buttons-container">
-        <button class="vrm-btn" onclick="alert('VRM Details')">VRM Details</button>
-        <button class="dryer-btn" onclick="alert('Dryer Details')">Dryer Details</button>
-        <button class="dispatch-btn" onclick="alert('Dispatch Details')">Dispatch Details</button>
+    <div class="button-container">
+        <button onclick="showVRMData()">VRM - 2374.1 MT</button>
+        <button onclick="showDryerData()">DRYER - 2442 MT</button>
+        <button onclick="showDispatchData()">DISPATCH - 2104 MT</button>
     </div>
 
     <h2 class="section-title">Key Performance Indicators</h2>
@@ -169,32 +231,66 @@
         <div class="kpi-box">
             <h3>VRM Production</h3>
             <div class="kpi-value">679.05 MT</div>
-            <div class="kpi-ytd">YTD: 2374.1 MT</div>
             <div class="kpi-label">Total Week Production</div>
         </div>
         <div class="kpi-box">
             <h3>Dryer Production</h3>
             <div class="kpi-value">674.5 MT</div>
-            <div class="kpi-ytd">YTD: 2442 MT</div>
             <div class="kpi-label">Total Week Production</div>
         </div>
         <div class="kpi-box">
             <h3>Dispatch Quantity</h3>
             <div class="kpi-value">734.96 MT</div>
-            <div class="kpi-ytd">YTD: 2104 MT</div>
             <div class="kpi-label">Total Week Dispatch</div>
         </div>
     </div>
 
-    <h2 class="section-title">Fuel Consumption</h2>
-    <div class="chart-container">
-        <div class="consumption-box">
-            <h3>JCB Diesel Consumption</h3>
-            <div class="consumption-value">300 Liters</div>
+    <div class="kpi-container">
+        <div class="kpi-box ytd">
+            <h3>VRM Production (YTD)</h3>
+            <div class="kpi-value">2374.1 MT</div>
+            <div class="kpi-label">Year-to-Date Total</div>
         </div>
-        <div class="consumption-box">
-            <h3>LDO Consumption</h3>
-            <div class="consumption-value">1145 Liters</div>
+        <div class="kpi-box ytd">
+            <h3>Dryer Production (YTD)</h3>
+            <div class="kpi-value">2442 MT</div>
+            <div class="kpi-label">Year-to-Date Total</div>
+        </div>
+        <div class="kpi-box ytd">
+            <h3>Dispatch Quantity (YTD)</h3>
+            <div class="kpi-value">2104 MT</div>
+            <div class="kpi-label">Year-to-Date Total</div>
+        </div>
+    </div>
+
+    <div class="customer-box">
+        <h3>Customer-wise Dispatch</h3>
+        <div class="customer-list">
+            <div class="customer-item">
+                <div class="customer-count">21</div>
+                <div class="customer-name">TALEGAON</div>
+            </div>
+            <div class="customer-item">
+                <div class="customer-count">1</div>
+                <div class="customer-name">ULTRATECH</div>
+            </div>
+            <div class="customer-item">
+                <div class="customer-count">2</div>
+                <div class="customer-name">TALOJA</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="consumption-box">
+        <div class="consumption-item" style="border-left: 4px solid #f39c12;">
+            <h3>Total JCB Diesel Consumption</h3>
+            <div class="consumption-value">300 Ltrs</div>
+            <div class="consumption-label">Week Total</div>
+        </div>
+        <div class="consumption-item" style="border-left: 4px solid #9b59b6;">
+            <h3>Total LDO Consumption</h3>
+            <div class="consumption-value">1145 Ltrs</div>
+            <div class="consumption-label">Week Total</div>
         </div>
     </div>
 
@@ -206,7 +302,54 @@
         </div>
         <div class="chart-box">
             <h2>Resource Consumption</h2>
-            <canvas id="consumptionChart"></canvas>
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Fuel Consumed - Dryer (Ltr)</th>
+                            <th>Electricity Consumed - VRM (Unit)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>June 9</td>
+                            <td>90</td>
+                            <td>2032</td>
+                        </tr>
+                        <tr>
+                            <td>June 10</td>
+                            <td>15</td>
+                            <td>3052</td>
+                        </tr>
+                        <tr>
+                            <td>June 11</td>
+                            <td>190</td>
+                            <td>1664</td>
+                        </tr>
+                        <tr>
+                            <td>June 12</td>
+                            <td>110</td>
+                            <td>1356</td>
+                        </tr>
+                        <tr>
+                            <td>June 13</td>
+                            <td>255</td>
+                            <td>2400</td>
+                        </tr>
+                        <tr>
+                            <td>June 14</td>
+                            <td>190</td>
+                            <td>1260</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Total</td>
+                            <td>850</td>
+                            <td>11764</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -279,6 +422,23 @@
         <div class="chart-box">
             <h2>Raw Material Received (MT)</h2>
             <canvas id="rawMaterialChart"></canvas>
+            <div class="raw-material-totals">
+                <div class="raw-material-total" style="border-left: 4px solid rgba(52, 152, 219, 1);">
+                    <h4>SGX Slurry</h4>
+                    <div class="value">125.7 MT</div>
+                    <div class="label">Total Received</div>
+                </div>
+                <div class="raw-material-total" style="border-left: 4px solid rgba(155, 89, 182, 1);">
+                    <h4>RWM-1 RH</h4>
+                    <div class="value">95.0 MT</div>
+                    <div class="label">Total Received</div>
+                </div>
+                <div class="raw-material-total" style="border-left: 4px solid rgba(26, 188, 156, 1);">
+                    <h4>RWM-2 OPC</h4>
+                    <div class="value">57.0 MT</div>
+                    <div class="label">Total Received</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -322,63 +482,6 @@
                         title: {
                             display: true,
                             text: 'Quantity (MT)'
-                        }
-                    }
-                }
-            }
-        });
-
-        // Consumption Chart
-        const consumptionCtx = document.getElementById('consumptionChart').getContext('2d');
-        const consumptionChart = new Chart(consumptionCtx, {
-            type: 'bar',
-            data: {
-                labels: ['June 9', 'June 10', 'June 11', 'June 12', 'June 13', 'June 14'],
-                datasets: [
-                    {
-                        label: 'Fuel Consumed - Dryer (Ltr)',
-                        data: [90, 15, 190, 110, 255, 190],
-                        backgroundColor: 'rgba(243, 156, 18, 0.7)',
-                        borderColor: 'rgba(243, 156, 18, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Electricity Consumed - VRM (Unit)',
-                        data: [2032, 3052, 1664, 1356, 2400, 1260],
-                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
-                        borderColor: 'rgba(46, 204, 113, 1)',
-                        borderWidth: 1,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                },
-                scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Fuel (Liters)'
-                        }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Electricity (Units)'
-                        },
-                        grid: {
-                            drawOnChartArea: false
                         }
                     }
                 }
@@ -437,6 +540,18 @@
         function loadData() {
             // In a real implementation, this would load data for the selected date
             alert('In a real implementation, this would load data for the selected date');
+        }
+
+        function showVRMData() {
+            alert('VRM Year-to-Date Production: 2374.1 MT');
+        }
+
+        function showDryerData() {
+            alert('Dryer Year-to-Date Production: 2442 MT');
+        }
+
+        function showDispatchData() {
+            alert('Year-to-Date Dispatch: 2104 MT');
         }
     </script>
 </body>
