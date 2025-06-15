@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Performance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin: 0;
+        }
+        .date-selector {
+            display: flex;
+            gap: 10px;
+        }
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .kpi-box {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid #3498db;
+        }
+        .kpi-box h3 {
+            margin-top: 0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .kpi-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .kpi-ytd {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .kpi-label {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+        .chart-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .chart-box {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .chart-box h2 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        .data-table {
+            width: 100%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .section-title {
+            color: #2c3e50;
+            margin: 25px 0 15px 0;
+        }
+        .divider {
+            border: 0;
+            height: 1px;
+            background-color: #ecf0f1;
+            margin: 20px 0;
+        }
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+        }
+        .vrm-btn { background-color: #2980b9; }
+        .dryer-btn { background-color: #e74c3c; }
+        .dispatch-btn { background-color: #27ae60; }
+        button:hover {
+            opacity: 0.9;
+        }
+        .consumption-box {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .consumption-box h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        .consumption-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <h1>Production Performance Dashboard (June 9 - June 14)</h1>
+        <div class="date-selector">
+            <input type="date" id="date-selector">
+            <button onclick="loadData()">Load Data</button>
+        </div>
+    </div>
+
+    <div class="buttons-container">
+        <button class="vrm-btn" onclick="alert('VRM Details')">VRM Details</button>
+        <button class="dryer-btn" onclick="alert('Dryer Details')">Dryer Details</button>
+        <button class="dispatch-btn" onclick="alert('Dispatch Details')">Dispatch Details</button>
+    </div>
+
+    <h2 class="section-title">Key Performance Indicators</h2>
+    <div class="kpi-container">
+        <div class="kpi-box">
+            <h3>VRM Production</h3>
+            <div class="kpi-value">679.05 MT</div>
+            <div class="kpi-ytd">YTD: 2374.1 MT</div>
+            <div class="kpi-label">Total Week Production</div>
+        </div>
+        <div class="kpi-box">
+            <h3>Dryer Production</h3>
+            <div class="kpi-value">674.5 MT</div>
+            <div class="kpi-ytd">YTD: 2442 MT</div>
+            <div class="kpi-label">Total Week Production</div>
+        </div>
+        <div class="kpi-box">
+            <h3>Dispatch Quantity</h3>
+            <div class="kpi-value">734.96 MT</div>
+            <div class="kpi-ytd">YTD: 2104 MT</div>
+            <div class="kpi-label">Total Week Dispatch</div>
+        </div>
+    </div>
+
+    <h2 class="section-title">Fuel Consumption</h2>
+    <div class="chart-container">
+        <div class="consumption-box">
+            <h3>JCB Diesel Consumption</h3>
+            <div class="consumption-value">300 Liters</div>
+        </div>
+        <div class="consumption-box">
+            <h3>LDO Consumption</h3>
+            <div class="consumption-value">1145 Liters</div>
+        </div>
+    </div>
+
+    <h2 class="section-title">Production Trends</h2>
+    <div class="chart-container">
+        <div class="chart-box">
+            <h2>Daily Production Quantity (MT)</h2>
+            <canvas id="productionChart"></canvas>
+        </div>
+        <div class="chart-box">
+            <h2>Resource Consumption</h2>
+            <canvas id="consumptionChart"></canvas>
+        </div>
+    </div>
+
+    <h2 class="section-title">Production Details</h2>
+    <div class="data-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Day Shift</th>
+                    <th>Night Shift</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="4" style="background-color: #f8f9fa; font-weight: bold;">VRM</td>
+                </tr>
+                <tr>
+                    <td>Production Qty (MT)</td>
+                    <td>350.8</td>
+                    <td>328.25</td>
+                    <td>679.05</td>
+                </tr>
+                <tr>
+                    <td>Running Hrs</td>
+                    <td>23.25</td>
+                    <td>25.15</td>
+                    <td>48.4</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="background-color: #f8f9fa; font-weight: bold;">Dryer</td>
+                </tr>
+                <tr>
+                    <td>Production Qty (MT)</td>
+                    <td>424.5</td>
+                    <td>250</td>
+                    <td>674.5</td>
+                </tr>
+                <tr>
+                    <td>Running Hrs</td>
+                    <td>38.5</td>
+                    <td>23.1</td>
+                    <td>61.6</td>
+                </tr>
+                <tr>
+                    <td>Dispatch Qty (MT)</td>
+                    <td>734.96</td>
+                    <td>0</td>
+                    <td>734.96</td>
+                </tr>
+                <tr>
+                    <td>NO Of Vehicles</td>
+                    <td>24</td>
+                    <td>0</td>
+                    <td>24</td>
+                </tr>
+                <tr>
+                    <td>No Of NMR</td>
+                    <td>139</td>
+                    <td>96</td>
+                    <td>235</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="section-title">Raw Material Received</h2>
+    <div class="chart-container">
+        <div class="chart-box">
+            <h2>Raw Material Received (MT)</h2>
+            <canvas id="rawMaterialChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Set today's date as default
+        document.getElementById('date-selector').valueAsDate = new Date();
+        
+        // Production Chart
+        const productionCtx = document.getElementById('productionChart').getContext('2d');
+        const productionChart = new Chart(productionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['June 9', 'June 10', 'June 11', 'June 12', 'June 13', 'June 14'],
+                datasets: [
+                    {
+                        label: 'VRM Production',
+                        data: [47.3, 88.7, 43.7, 33, 71.4, 34.25],
+                        backgroundColor: 'rgba(41, 128, 185, 0.7)',
+                        borderColor: 'rgba(41, 128, 185, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Dryer Production',
+                        data: [47, 93, 37, 32, 67, 66],
+                        backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                        borderColor: 'rgba(231, 76, 60, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantity (MT)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Consumption Chart
+        const consumptionCtx = document.getElementById('consumptionChart').getContext('2d');
+        const consumptionChart = new Chart(consumptionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['June 9', 'June 10', 'June 11', 'June 12', 'June 13', 'June 14'],
+                datasets: [
+                    {
+                        label: 'Fuel Consumed - Dryer (Ltr)',
+                        data: [90, 15, 190, 110, 255, 190],
+                        backgroundColor: 'rgba(243, 156, 18, 0.7)',
+                        borderColor: 'rgba(243, 156, 18, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Electricity Consumed - VRM (Unit)',
+                        data: [2032, 3052, 1664, 1356, 2400, 1260],
+                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                        borderColor: 'rgba(46, 204, 113, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Fuel (Liters)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Electricity (Units)'
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Raw Material Chart
+        const rawMaterialCtx = document.getElementById('rawMaterialChart').getContext('2d');
+        const rawMaterialChart = new Chart(rawMaterialCtx, {
+            type: 'bar',
+            data: {
+                labels: ['June 9', 'June 10', 'June 11', 'June 12', 'June 13', 'June 14'],
+                datasets: [
+                    {
+                        label: 'SGX Slurry',
+                        data: [0, 33.2, 31.2, 0, 0, 61.3],
+                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'RWM-1 RH',
+                        data: [0, 30, 35, 0, 0, 30],
+                        backgroundColor: 'rgba(155, 89, 182, 0.7)',
+                        borderColor: 'rgba(155, 89, 182, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'RWM-2 OPC',
+                        data: [0, 5, 7.5, 7.5, 0, 37],
+                        backgroundColor: 'rgba(26, 188, 156, 0.7)',
+                        borderColor: 'rgba(26, 188, 156, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantity (MT)'
+                        }
+                    }
+                }
+            }
+        });
+
+        function loadData() {
+            // In a real implementation, this would load data for the selected date
+            alert('In a real implementation, this would load data for the selected date');
+        }
+    </script>
+</body>
+</html>
