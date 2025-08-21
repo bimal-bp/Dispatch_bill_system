@@ -3,556 +3,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Production Performance Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Weighment Data Entry System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
+            background-color: #f8f9fa;
             padding: 20px;
-            background-color: #f5f7fa;
-            color: #333;
         }
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 30px;
         }
         h1 {
             color: #2c3e50;
-            margin: 0;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
         }
-        .date-selector {
-            display: flex;
-            gap: 10px;
+        .form-label {
+            font-weight: 500;
         }
-        .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .kpi-box {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border-left: 4px solid #3498db;
-        }
-        .kpi-box.ytd {
-            border-left-color: #e74c3c;
-        }
-        .kpi-box h3 {
-            margin-top: 0;
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-        .kpi-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .kpi-label {
-            font-size: 12px;
-            color: #95a5a6;
-        }
-        .chart-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .chart-box {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .chart-box h2 {
-            margin-top: 0;
-            font-size: 16px;
-            color: #2c3e50;
-        }
-        .data-table {
-            width: 100%;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-            overflow: hidden;
+        .table-responsive {
+            overflow-x: auto;
         }
         table {
             width: 100%;
             border-collapse: collapse;
         }
         th, td {
-            padding: 12px 15px;
+            border: 1px solid #dee2e6;
+            padding: 8px;
             text-align: left;
-            border-bottom: 1px solid #ecf0f1;
         }
         th {
-            background-color: #f8f9fa;
-            color: #7f8c8d;
-            font-weight: 600;
+            background-color: #e9ecef;
+            position: sticky;
+            top: 0;
         }
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-        .section-title {
-            color: #2c3e50;
-            margin: 25px 0 15px 0;
-        }
-        .divider {
-            border: 0;
-            height: 1px;
-            background-color: #ecf0f1;
-            margin: 20px 0;
-        }
-        .button-container {
+        .btn-container {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
-        .button-container button {
-            padding: 8px 16px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .button-container button:hover {
-            background-color: #2980b9;
-        }
-        .consumption-box {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .consumption-item {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .consumption-item h3 {
-            margin-top: 0;
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-        .consumption-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .consumption-label {
-            font-size: 12px;
-            color: #95a5a6;
-        }
-        .customer-box {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-        .customer-box h3 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
-        .customer-list {
-            display: flex;
-            gap: 20px;
-        }
-        .customer-item {
-            text-align: center;
-        }
-        .customer-count {
-            font-size: 24px;
-            font-weight: bold;
-            color: #3498db;
-        }
-        .customer-name {
-            font-size: 14px;
-            color: #7f8c8d;
-        }
-        .total-row {
-            font-weight: bold;
+        .calculated {
             background-color: #f8f9fa;
+            font-weight: 500;
         }
-        .raw-material-totals {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 15px;
+        .section-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 8px 15px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            border-radius: 5px;
         }
-        .raw-material-total {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            text-align: center;
-        }
-        .raw-material-total h4 {
-            margin: 0 0 5px 0;
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-        .raw-material-total .value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .raw-material-total .label {
-            font-size: 12px;
-            color: #95a5a6;
+        @media (max-width: 768px) {
+            .btn-container {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-header">
-        <h1>Production Performance Dashboard (June 9 - June 14)</h1>
-        <div class="date-selector">
-            <input type="date" id="date-selector">
-            <button onclick="loadData()">Load Data</button>
-        </div>
-    </div>
-
-    <div class="button-container">
-        <button onclick="showVRMData()">VRM - 2374.1 MT</button>
-        <button onclick="showDryerData()">DRYER - 2442 MT</button>
-        <button onclick="showDispatchData()">DISPATCH - 2104 MT</button>
-    </div>
-
-    <h2 class="section-title">Key Performance Indicators</h2>
-    <div class="kpi-container">
-        <div class="kpi-box">
-            <h3>VRM Production</h3>
-            <div class="kpi-value">679.05 MT</div>
-            <div class="kpi-label">Total Week Production</div>
-        </div>
-        <div class="kpi-box">
-            <h3>Dryer Production</h3>
-            <div class="kpi-value">674.5 MT</div>
-            <div class="kpi-label">Total Week Production</div>
-        </div>
-        <div class="kpi-box">
-            <h3>Dispatch Quantity</h3>
-            <div class="kpi-value">734.96 MT</div>
-            <div class="kpi-label">Total Week Dispatch</div>
-        </div>
-    </div>
-
-    <div class="kpi-container">
-        <div class="kpi-box ytd">
-            <h3>VRM Production (YTD)</h3>
-            <div class="kpi-value">2374.1 MT</div>
-            <div class="kpi-label">Year-to-Date Total</div>
-        </div>
-        <div class="kpi-box ytd">
-            <h3>Dryer Production (YTD)</h3>
-            <div class="kpi-value">2442 MT</div>
-            <div class="kpi-label">Year-to-Date Total</div>
-        </div>
-        <div class="kpi-box ytd">
-            <h3>Dispatch Quantity (YTD)</h3>
-            <div class="kpi-value">2104 MT</div>
-            <div class="kpi-label">Year-to-Date Total</div>
-        </div>
-    </div>
-
-    <div class="customer-box">
-        <h3>Customer-wise Dispatch</h3>
-        <div class="customer-list">
-            <div class="customer-item">
-                <div class="customer-count">21</div>
-                <div class="customer-name">TALEGAON</div>
-            </div>
-            <div class="customer-item">
-                <div class="customer-count">1</div>
-                <div class="customer-name">ULTRATECH</div>
-            </div>
-            <div class="customer-item">
-                <div class="customer-count">2</div>
-                <div class="customer-name">TALOJA</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="consumption-box">
-        <div class="consumption-item" style="border-left: 4px solid #f39c12;">
-            <h3>Total JCB Diesel Consumption</h3>
-            <div class="consumption-value">300 Ltrs</div>
-            <div class="consumption-label">Week Total</div>
-        </div>
-        <div class="consumption-item" style="border-left: 4px solid #9b59b6;">
-            <h3>Total LDO Consumption</h3>
-            <div class="consumption-value">1145 Ltrs</div>
-            <div class="consumption-label">Week Total</div>
-        </div>
-    </div>
-
-    <h2 class="section-title">Production Trends</h2>
-    <div class="chart-container">
-        <div class="chart-box">
-            <h2>Daily Production Quantity (MT)</h2>
-            <canvas id="productionChart"></canvas>
-        </div>
-        <div class="chart-box">
-            <h2>Resource Consumption</h2>
-            <div class="data-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Fuel Consumed - Dryer (Ltr)</th>
-                            <th>Electricity Consumed - VRM (Unit)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>June 9</td>
-                            <td>90</td>
-                            <td>2032</td>
-                        </tr>
-                        <tr>
-                            <td>June 10</td>
-                            <td>15</td>
-                            <td>3052</td>
-                        </tr>
-                        <tr>
-                            <td>June 11</td>
-                            <td>190</td>
-                            <td>1664</td>
-                        </tr>
-                        <tr>
-                            <td>June 12</td>
-                            <td>110</td>
-                            <td>1356</td>
-                        </tr>
-                        <tr>
-                            <td>June 13</td>
-                            <td>255</td>
-                            <td>2400</td>
-                        </tr>
-                        <tr>
-                            <td>June 14</td>
-                            <td>190</td>
-                            <td>1260</td>
-                        </tr>
-                        <tr class="total-row">
-                            <td>Total</td>
-                            <td>850</td>
-                            <td>11764</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <h2 class="section-title">Production Details</h2>
-    <div class="data-table">
-        <table>
-            <thead>
-                <tr>
-                    <th>Description</th>
-                    <th>Day Shift</th>
-                    <th>Night Shift</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="4" style="background-color: #f8f9fa; font-weight: bold;">VRM</td>
-                </tr>
-                <tr>
-                    <td>Production Qty (MT)</td>
-                    <td>350.8</td>
-                    <td>328.25</td>
-                    <td>679.05</td>
-                </tr>
-                <tr>
-                    <td>Running Hrs</td>
-                    <td>23.25</td>
-                    <td>25.15</td>
-                    <td>48.4</td>
-                </tr>
-                <tr>
-                    <td colspan="4" style="background-color: #f8f9fa; font-weight: bold;">Dryer</td>
-                </tr>
-                <tr>
-                    <td>Production Qty (MT)</td>
-                    <td>424.5</td>
-                    <td>250</td>
-                    <td>674.5</td>
-                </tr>
-                <tr>
-                    <td>Running Hrs</td>
-                    <td>38.5</td>
-                    <td>23.1</td>
-                    <td>61.6</td>
-                </tr>
-                <tr>
-                    <td>Dispatch Qty (MT)</td>
-                    <td>734.96</td>
-                    <td>0</td>
-                    <td>734.96</td>
-                </tr>
-                <tr>
-                    <td>NO Of Vehicles</td>
-                    <td>24</td>
-                    <td>0</td>
-                    <td>24</td>
-                </tr>
-                <tr>
-                    <td>No Of NMR</td>
-                    <td>139</td>
-                    <td>96</td>
-                    <td>235</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <h2 class="section-title">Raw Material Received</h2>
-    <div class="chart-container">
-        <div class="chart-box">
-            <h2>Raw Material Received (MT)</h2>
-            <canvas id="rawMaterialChart"></canvas>
-            <div class="raw-material-totals">
-                <div class="raw-material-total" style="border-left: 4px solid rgba(52, 152, 219, 1);">
-                    <h4>SGX Slurry</h4>
-                    <div class="value">125.7 MT</div>
-                    <div class="label">Total Received</div>
+    <div class="container">
+        <h1>Weighment Data Entry System</h1>
+        
+        <form id="weighmentForm">
+            <!-- Basic Information Section -->
+            <div class="section-header">Basic Information</div>
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <label for="accountingDate" class="form-label">Accounting Date</label>
+                    <input type="date" class="form-control" id="accountingDate" required>
                 </div>
-                <div class="raw-material-total" style="border-left: 4px solid rgba(155, 89, 182, 1);">
-                    <h4>RWM-1 RH</h4>
-                    <div class="value">95.0 MT</div>
-                    <div class="label">Total Received</div>
+                <div class="col-md-3">
+                    <label for="date" class="form-label">Date</label>
+                    <input type="date" class="form-control" id="date" required>
                 </div>
-                <div class="raw-material-total" style="border-left: 4px solid rgba(26, 188, 156, 1);">
-                    <h4>RWM-2 OPC</h4>
-                    <div class="value">57.0 MT</div>
-                    <div class="label">Total Received</div>
+                <div class="col-md-3">
+                    <label for="weighmentSlipNo" class="form-label">Weighment Slip No</label>
+                    <input type="text" class="form-control" id="weighmentSlipNo">
+                </div>
+                <div class="col-md-3">
+                    <label for="deliveryChallanNo" class="form-label">Delivery Challan No</label>
+                    <input type="text" class="form-control" id="deliveryChallanNo">
                 </div>
             </div>
+
+            <!-- Royalty Information Section -->
+            <div class="section-header">Royalty Information</div>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label for="royaltyPermitNo" class="form-label">Royalty Permit No</label>
+                    <input type="text" class="form-control" id="royaltyPermitNo">
+                </div>
+                <div class="col-md-4">
+                    <label for="permitQty" class="form-label">Permit Qty (MT)</label>
+                    <input type="number" class="form-control" id="permitQty" step="0.01">
+                </div>
+                <div class="col-md-4">
+                    <label for="royaltyRate" class="form-label">Royalty Rate</label>
+                    <input type="number" class="form-control" id="royaltyRate" step="0.01">
+                </div>
+            </div>
+
+            <!-- Customer Information Section -->
+            <div class="section-header">Customer Information</div>
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <label for="customerSrNo" class="form-label">Customer Sr.No.</label>
+                    <input type="text" class="form-control" id="customerSrNo">
+                </div>
+                <div class="col-md-5">
+                    <label for="customerName" class="form-label">Customer Name</label>
+                    <input type="text" class="form-control" id="customerName">
+                </div>
+                <div class="col-md-4">
+                    <label for="clientDetails" class="form-label">Client Details</label>
+                    <input type="text" class="form-control" id="clientDetails">
+                </div>
+            </div>
+
+            <!-- Payment and Vehicle Information -->
+            <div class="section-header">Payment and Vehicle Information</div>
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <label for="paymentMode" class="form-label">Payment Mode</label>
+                    <select class="form-select" id="paymentMode">
+                        <option value="">Select Payment Mode</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Card</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Credit">Credit</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="vehicleNo" class="form-label">Vehicle No</label>
+                    <input type="text" class="form-control" id="vehicleNo">
+                </div>
+                <div class="col-md-3">
+                    <label for="material" class="form-label">Material</label>
+                    <input type="text" class="form-control" id="material">
+                </div>
+                <div class="col-md-3">
+                    <label for="transportRate" class="form-label">Transport Rate</label>
+                    <input type="number" class="form-control" id="transportRate" step="0.01">
+                </div>
+            </div>
+
+            <!-- Weighment Details Section -->
+            <div class="section-header">Weighment Details</div>
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <label for="grossWt" class="form-label">Gross WT</label>
+                    <input type="number" class="form-control" id="grossWt" step="0.01">
+                </div>
+                <div class="col-md-3">
+                    <label for="tareWt" class="form-label">Tare WT</label>
+                    <input type="number" class="form-control" id="tareWt" step="0.01">
+                </div>
+                <div class="col-md-3">
+                    <label for="netWt" class="form-label">NET WT (Calculated)</label>
+                    <input type="number" class="form-control calculated" id="netWt" readonly>
+                </div>
+                <div class="col-md-3">
+                    <label for="ratePerTone" class="form-label">Rate Per Tone</label>
+                    <input type="number" class="form-control" id="ratePerTone" step="0.01">
+                </div>
+            </div>
+
+            <!-- Financial Information Section -->
+            <div class="section-header">Financial Information</div>
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <label for="saleAmount" class="form-label">Sale Amount (Calculated)</label>
+                    <input type="number" class="form-control calculated" id="saleAmount" readonly>
+                </div>
+                <div class="col-md-3">
+                    <label for="cashReceived" class="form-label">Cash Received</label>
+                    <input type="number" class="form-control" id="cashReceived" step="0.01">
+                </div>
+                <div class="col-md-3">
+                    <label for="customerBalance" class="form-label">Customer Balance Amount (₹)</label>
+                    <input type="number" class="form-control calculated" id="customerBalance" readonly>
+                </div>
+                <div class="col-md-3">
+                    <label for="royaltyAmount" class="form-label">Royalty Amount (Calculated)</label>
+                    <input type="number" class="form-control calculated" id="royaltyAmount" readonly>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="section-header">Additional Information</div>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label for="transportAmount" class="form-label">Transport Amount (Calculated)</label>
+                    <input type="number" class="form-control calculated" id="transportAmount" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label for="totalAmount" class="form-label">Total Amount (Calculated)</label>
+                    <input type="number" class="form-control calculated" id="totalAmount" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label for="remarks" class="form-label">Remarks</label>
+                    <input type="text" class="form-control" id="remarks">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="btn-container">
+                <button type="submit" class="btn btn-primary">Save Entry</button>
+                <button type="reset" class="btn btn-secondary">Clear Form</button>
+                <button type="button" class="btn btn-info" id="btnCalculate">Calculate Values</button>
+                <button type="button" class="btn btn-success" id="btnExport">Export to Excel</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>Data Records</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>S.NO</th>
+                        <th>Accounting Date</th>
+                        <th>Date</th>
+                        <th>Weighment Slip No</th>
+                        <th>Customer Name</th>
+                        <th>Vehicle No</th>
+                        <th>NET WT</th>
+                        <th>Sale Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsTable">
+                    <tr>
+                        <td colspan="9" class="text-center">No records found</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        // Set today's date as default
-        document.getElementById('date-selector').valueAsDate = new Date();
-        
-        // Production Chart
-        const productionCtx = document.getElementById('productionChart').getContext('2d');
-        const productionChart = new Chart(productionCtx, {
-            type: 'bar',
-            data: {
-                labels: ['June 9', 'June 10', 'June 11', 'June 12', 'June 13', 'June 14'],
-                datasets: [
-                    {
-                        label: 'VRM Production',
-                        data: [47.3, 88.7, 43.7, 33, 71.4, 34.25],
-                        backgroundColor: 'rgba(41, 128, 185, 0.7)',
-                        borderColor: 'rgba(41, 128, 185, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Dryer Production',
-                        data: [47, 93, 37, 32, 67, 66],
-                        backgroundColor: 'rgba(231, 76, 60, 0.7)',
-                        borderColor: 'rgba(231, 76, 60, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Quantity (MT)'
-                        }
-                    }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default dates to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('accountingDate').value = today;
+            document.getElementById('date').value = today;
+            
+            // Calculate net weight when gross or tare weight changes
+            document.getElementById('grossWt').addEventListener('input', calculateValues);
+            document.getElementById('tareWt').addEventListener('input', calculateValues);
+            
+            // Calculate sale amount when net weight or rate changes
+            document.getElementById('ratePerTone').addEventListener('input', calculateValues);
+            
+            // Calculate royalty amount when royalty rate or net weight changes
+            document.getElementById('royaltyRate').addEventListener('input', calculateValues);
+            
+            // Calculate transport amount when transport rate or net weight changes
+            document.getElementById('transportRate').addEventListener('input', calculateValues);
+            
+            // Calculate customer balance when cash received changes
+            document.getElementById('cashReceived').addEventListener('input', calculateValues);
+            
+            // Manual calculation button
+            document.getElementById('btnCalculate').addEventListener('click', calculateAllValues);
+            
+            // Export to Excel button
+            document.getElementById('btnExport').addEventListener('click', exportToExcel);
+            
+            // Form submission
+            document.getElementById('weighmentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addRecord();
+            });
+            
+            function calculateValues() {
+                // Calculate Net Weight
+                const grossWt = parseFloat(document.getElementById('grossWt').value) || 0;
+                const tareWt = parseFloat(document.getElementById('tareWt').value) || 0;
+                const netWt = grossWt - tareWt;
+                document.getElementById('netWt').value = netWt.toFixed(2);
+                
+                // Calculate Sale Amount
+                const ratePerTone = parseFloat(document.getElementById('ratePerTone').value) || 0;
+                const saleAmount = netWt * ratePerTone;
+                document.getElementById('saleAmount').value = saleAmount.toFixed(2);
+                
+                // Calculate Royalty Amount
+                const royaltyRate = parseFloat(document.getElementById('royaltyRate').value) || 0;
+                const royaltyAmount = netWt * royaltyRate;
+                document.getElementById('royaltyAmount').value = royaltyAmount.toFixed(2);
+                
+                // Calculate Transport Amount
+                const transportRate = parseFloat(document.getElementById('transportRate').value) || 0;
+                const transportAmount = netWt * transportRate;
+                document.getElementById('transportAmount').value = transportAmount.toFixed(2);
+                
+                // Calculate Total Amount
+                const totalAmount = saleAmount + royaltyAmount + transportAmount;
+                document.getElementById('totalAmount').value = totalAmount.toFixed(2);
+                
+                // Calculate Customer Balance
+                const cashReceived = parseFloat(document.getElementById('cashReceived').value) || 0;
+                const customerBalance = totalAmount - cashReceived;
+                document.getElementById('customerBalance').value = customerBalance.toFixed(2);
+            }
+            
+            function calculateAllValues() {
+                calculateValues();
+                alert("All values have been calculated.");
+            }
+            
+            function addRecord() {
+                calculateValues();
+                
+                // Get the table body
+                const tableBody = document.getElementById('recordsTable');
+                
+                // Check if the table has the "no records" row and remove it
+                if (tableBody.rows.length === 1 && tableBody.rows[0].cells[0].colSpan > 1) {
+                    tableBody.deleteRow(0);
                 }
+                
+                // Create a new row
+                const newRow = tableBody.insertRow();
+                
+                // Add cells with data
+                newRow.insertCell(0).textContent = tableBody.rows.length;
+                newRow.insertCell(1).textContent = document.getElementById('accountingDate').value;
+                newRow.insertCell(2).textContent = document.getElementById('date').value;
+                newRow.insertCell(3).textContent = document.getElementById('weighmentSlipNo').value;
+                newRow.insertCell(4).textContent = document.getElementById('customerName').value;
+                newRow.insertCell(5).textContent = document.getElementById('vehicleNo').value;
+                newRow.insertCell(6).textContent = document.getElementById('netWt').value;
+                newRow.insertCell(7).textContent = document.getElementById('saleAmount').value;
+                
+                // Add actions cell
+                const actionsCell = newRow.insertCell(8);
+                actionsCell.innerHTML = '<button class="btn btn-sm btn-info">View</button> <button class="btn btn-sm btn-danger">Delete</button>';
+                
+                // Add event listener to delete button
+                actionsCell.querySelector('.btn-danger').addEventListener('click', function() {
+                    tableBody.deleteRow(newRow.rowIndex - 1);
+                    
+                    // If no records left, add the "no records" row
+                    if (tableBody.rows.length === 0) {
+                        const noRecordsRow = tableBody.insertRow();
+                        const cell = noRecordsRow.insertCell(0);
+                        cell.textContent = 'No records found';
+                        cell.colSpan = 9;
+                        cell.className = 'text-center';
+                    }
+                });
+                
+                // Reset the form
+                document.getElementById('weighmentForm').reset();
+                
+                // Set default dates to today again
+                document.getElementById('accountingDate').value = today;
+                document.getElementById('date').value = today;
+                
+                alert("Record added successfully!");
+            }
+            
+            function exportToExcel() {
+                alert("Export to Excel functionality would be implemented here. In a real application, this would generate an Excel file with all the data.");
+                // This would typically use a library like SheetJS to export data
             }
         });
-
-        // Raw Material Chart
-        const rawMaterialCtx = document.getElementById('rawMaterialChart').getContext('2d');
-        const rawMaterialChart = new Chart(rawMaterialCtx, {
-            type: 'bar',
-            data: {
-                labels: ['June 9', 'June 10', 'June 11', 'June 12', 'June 13', 'June 14'],
-                datasets: [
-                    {
-                        label: 'SGX Slurry',
-                        data: [0, 33.2, 31.2, 0, 0, 61.3],
-                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
-                        borderColor: 'rgba(52, 152, 219, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'RWM-1 RH',
-                        data: [0, 30, 35, 0, 0, 30],
-                        backgroundColor: 'rgba(155, 89, 182, 0.7)',
-                        borderColor: 'rgba(155, 89, 182, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'RWM-2 OPC',
-                        data: [0, 5, 7.5, 7.5, 0, 37],
-                        backgroundColor: 'rgba(26, 188, 156, 0.7)',
-                        borderColor: 'rgba(26, 188, 156, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Quantity (MT)'
-                        }
-                    }
-                }
-            }
-        });
-
-        function loadData() {
-            // In a real implementation, this would load data for the selected date
-            alert('In a real implementation, this would load data for the selected date');
-        }
-
-        function showVRMData() {
-            alert('VRM Year-to-Date Production: 2374.1 MT');
-        }
-
-        function showDryerData() {
-            alert('Dryer Year-to-Date Production: 2442 MT');
-        }
-
-        function showDispatchData() {
-            alert('Year-to-Date Dispatch: 2104 MT');
-        }
     </script>
 </body>
 </html>
