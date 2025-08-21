@@ -67,6 +67,22 @@
         .report-table {
             margin-top: 15px;
         }
+        .shift-header {
+            background-color: #ffc107;
+            font-weight: bold;
+            text-align: center;
+        }
+        .customer-header {
+            background-color: #d8bfd8;
+            font-weight: bold;
+        }
+        .total-header {
+            background-color: #90ee90;
+            font-weight: bold;
+        }
+        .number-cell {
+            text-align: right;
+        }
         @media (max-width: 768px) {
             .btn-container {
                 flex-direction: column;
@@ -93,8 +109,9 @@
                 <div class="col-md-2">
                     <label for="shift" class="form-label">Shift</label>
                     <select class="form-select" id="shift">
-                        <option value="Day">Day</option>
-                        <option value="Night">Night</option>
+                        <option value="A-SHIFT">A-SHIFT</option>
+                        <option value="B-SHIFT">B-SHIFT</option>
+                        <option value="C-SHIFT">C-SHIFT</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -141,6 +158,32 @@
                 </div>
             </div>
 
+            <!-- Material Information -->
+            <div class="section-header">Material Information</div>
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <label for="materialType" class="form-label">Material Type</label>
+                    <select class="form-select" id="materialType">
+                        <option value="">Select Material</option>
+                        <option value="10 MM">10 MM</option>
+                        <option value="20 MM">20 MM</option>
+                        <option value="V/SAND">V/SAND</option>
+                        <option value="Scalping">Scalping</option>
+                        <option value="P/Sand">P/Sand</option>
+                        <option value="40MM">40MM</option>
+                        <option value="GSB/WET MIX">GSB/WET MIX</option>
+                        <option value="R/Sand">R/Sand</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="unit" class="form-label">Unit</label>
+                    <select class="form-select" id="unit">
+                        <option value="MT">MT</option>
+                        <option value="Nos.">Nos.</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- Payment and Vehicle Information -->
             <div class="section-header">Payment and Vehicle Information</div>
             <div class="row mb-4">
@@ -160,12 +203,12 @@
                     <input type="text" class="form-control" id="vehicleNo">
                 </div>
                 <div class="col-md-3">
-                    <label for="material" class="form-label">Material</label>
-                    <input type="text" class="form-control" id="material">
-                </div>
-                <div class="col-md-3">
                     <label for="transportRate" class="form-label">Transport Rate</label>
                     <input type="number" class="form-control" id="transportRate" step="0.01">
+                </div>
+                <div class="col-md-3">
+                    <label for="driverName" class="form-label">Driver Name</label>
+                    <input type="text" class="form-control" id="driverName">
                 </div>
             </div>
 
@@ -230,10 +273,9 @@
 
             <!-- Action Buttons -->
             <div class="btn-container">
-                <button type="submit" class="btn btn-primary">Save Entry</button>
+                <button type="submit" class="btn btn-success">Save Entry</button>
                 <button type="reset" class="btn btn-secondary">Clear Form</button>
                 <button type="button" class="btn btn-info" id="btnCalculate">Calculate Values</button>
-                <button type="button" class="btn btn-success" id="btnExport">Export to Excel</button>
                 <button type="button" class="btn btn-warning" id="btnGenerateReports">Generate Reports</button>
             </div>
         </form>
@@ -252,6 +294,7 @@
                         <th>Weighment Slip No</th>
                         <th>Customer Name</th>
                         <th>Vehicle No</th>
+                        <th>Material Type</th>
                         <th>NET WT</th>
                         <th>Sale Amount</th>
                         <th>Actions</th>
@@ -259,7 +302,7 @@
                 </thead>
                 <tbody id="recordsTable">
                     <tr>
-                        <td colspan="10" class="text-center">No records found</td>
+                        <td colspan="11" class="text-center">No records found</td>
                     </tr>
                 </tbody>
             </table>
@@ -270,92 +313,64 @@
     <div class="container report-section">
         <h2>Reports</h2>
         
-        <!-- Day/Night Sales Report -->
-        <div class="section-header">Day/Night Sales Report</div>
+        <!-- Dispatch Vehicle Wise Planning Report -->
+        <div class="section-header">Dispatch Vehicle Wise Planning Report</div>
         <div class="row mb-4">
             <div class="col-md-4">
-                <label for="reportDate" class="form-label">Select Date for Report</label>
-                <input type="date" class="form-control" id="reportDate">
+                <label for="dispatchReportDate" class="form-label">Select Date for Report</label>
+                <input type="date" class="form-control" id="dispatchReportDate">
+            </div>
+            <div class="col-md-3">
+                <label for="dispatchReportShift" class="form-label">Select Shift</label>
+                <select class="form-select" id="dispatchReportShift">
+                    <option value="A-SHIFT">A-SHIFT</option>
+                    <option value="B-SHIFT">B-SHIFT</option>
+                    <option value="C-SHIFT">C-SHIFT</option>
+                    <option value="ALL">ALL SHIFTS</option>
+                </select>
             </div>
             <div class="col-md-2">
                 <label class="form-label">&nbsp;</label>
-                <button type="button" class="btn btn-primary form-control" id="btnDayNightReport">Generate Day/Night Report</button>
+                <button type="button" class="btn btn-primary form-control" id="btnDispatchReport">Generate Dispatch Report</button>
             </div>
         </div>
         <div class="table-responsive">
-            <table class="table table-bordered report-table" id="dayNightReportTable">
-                <thead>
-                    <tr>
-                        <th>Shift</th>
-                        <th>Total NET WT (MT)</th>
-                        <th>Total Sale Amount (₹)</th>
-                        <th>Total Royalty Amount (₹)</th>
-                        <th>Total Transport Amount (₹)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="5" class="text-center">No report generated yet</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div id="dispatchReportContainer"></div>
         </div>
 
-        <!-- Customer-wise Report -->
-        <div class="section-header">Customer-wise Dispatch Report</div>
+        <!-- Transport Bill Report -->
+        <div class="section-header">Transport Bill Report</div>
         <div class="row mb-4">
             <div class="col-md-4">
-                <label for="customerReportDate" class="form-label">Select Date for Report</label>
-                <input type="date" class="form-control" id="customerReportDate">
+                <label for="transportBillDate" class="form-label">Select Date for Report</label>
+                <input type="date" class="form-control" id="transportBillDate">
+            </div>
+            <div class="col-md-3">
+                <label for="transportBillVehicle" class="form-label">Vehicle No (Optional)</label>
+                <input type="text" class="form-control" id="transportBillVehicle" placeholder="Leave blank for all vehicles">
             </div>
             <div class="col-md-2">
                 <label class="form-label">&nbsp;</label>
-                <button type="button" class="btn btn-primary form-control" id="btnCustomerReport">Generate Customer Report</button>
+                <button type="button" class="btn btn-primary form-control" id="btnTransportBill">Generate Transport Bill</button>
             </div>
         </div>
         <div class="table-responsive">
-            <table class="table table-bordered report-table" id="customerReportTable">
-                <thead>
-                    <tr>
-                        <th>Customer Name</th>
-                        <th>Total NET WT (MT)</th>
-                        <th>Total Sale Amount (₹)</th>
-                        <th>Number of Vehicles</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="4" class="text-center">No report generated yet</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Transport Report -->
-        <div class="section-header">Transport Report</div>
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <label for="transportReportDate" class="form-label">Select Date for Report</label>
-                <input type="date" class="form-control" id="transportReportDate">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">&nbsp;</label>
-                <button type="button" class="btn btn-primary form-control" id="btnTransportReport">Generate Transport Report</button>
-            </div>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-bordered report-table" id="transportReportTable">
+            <table class="table table-bordered report-table" id="transportBillTable">
                 <thead>
                     <tr>
                         <th>Vehicle No</th>
-                        <th>Total NET WT (MT)</th>
-                        <th>Total Transport Amount (₹)</th>
-                        <th>Number of Trips</th>
+                        <th>Driver Name</th>
+                        <th>Date</th>
+                        <th>Shift</th>
+                        <th>Material</th>
+                        <th>NET WT (MT)</th>
+                        <th>Transport Rate</th>
+                        <th>Transport Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="4" class="text-center">No report generated yet</td>
+                        <td colspan="8" class="text-center">No report generated yet</td>
                     </tr>
                 </tbody>
             </table>
@@ -372,9 +387,8 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('accountingDate').value = today;
             document.getElementById('date').value = today;
-            document.getElementById('reportDate').value = today;
-            document.getElementById('customerReportDate').value = today;
-            document.getElementById('transportReportDate').value = today;
+            document.getElementById('dispatchReportDate').value = today;
+            document.getElementById('transportBillDate').value = today;
             
             // Calculate net weight when gross or tare weight changes
             document.getElementById('grossWt').addEventListener('input', calculateValues);
@@ -395,13 +409,9 @@
             // Manual calculation button
             document.getElementById('btnCalculate').addEventListener('click', calculateAllValues);
             
-            // Export to Excel button
-            document.getElementById('btnExport').addEventListener('click', exportToExcel);
-            
             // Report generation buttons
-            document.getElementById('btnDayNightReport').addEventListener('click', generateDayNightReport);
-            document.getElementById('btnCustomerReport').addEventListener('click', generateCustomerReport);
-            document.getElementById('btnTransportReport').addEventListener('click', generateTransportReport);
+            document.getElementById('btnDispatchReport').addEventListener('click', generateDispatchReport);
+            document.getElementById('btnTransportBill').addEventListener('click', generateTransportBill);
             
             // Form submission
             document.getElementById('weighmentForm').addEventListener('submit', function(e) {
@@ -465,7 +475,9 @@
                     clientDetails: document.getElementById('clientDetails').value,
                     paymentMode: document.getElementById('paymentMode').value,
                     vehicleNo: document.getElementById('vehicleNo').value,
-                    material: document.getElementById('material').value,
+                    driverName: document.getElementById('driverName').value,
+                    materialType: document.getElementById('materialType').value,
+                    unit: document.getElementById('unit').value,
                     transportRate: parseFloat(document.getElementById('transportRate').value) || 0,
                     grossWt: parseFloat(document.getElementById('grossWt').value) || 0,
                     tareWt: parseFloat(document.getElementById('tareWt').value) || 0,
@@ -502,11 +514,12 @@
                 newRow.insertCell(4).textContent = record.weighmentSlipNo;
                 newRow.insertCell(5).textContent = record.customerName;
                 newRow.insertCell(6).textContent = record.vehicleNo;
-                newRow.insertCell(7).textContent = record.netWt.toFixed(2);
-                newRow.insertCell(8).textContent = record.saleAmount.toFixed(2);
+                newRow.insertCell(7).textContent = record.materialType;
+                newRow.insertCell(8).textContent = record.netWt.toFixed(2);
+                newRow.insertCell(9).textContent = record.saleAmount.toFixed(2);
                 
                 // Add actions cell
-                const actionsCell = newRow.insertCell(9);
+                const actionsCell = newRow.insertCell(10);
                 actionsCell.innerHTML = '<button class="btn btn-sm btn-info">View</button> <button class="btn btn-sm btn-danger">Delete</button>';
                 
                 // Add event listener to delete button
@@ -522,7 +535,7 @@
                         const noRecordsRow = tableBody.insertRow();
                         const cell = noRecordsRow.insertCell(0);
                         cell.textContent = 'No records found';
-                        cell.colSpan = 10;
+                        cell.colSpan = 11;
                         cell.className = 'text-center';
                     }
                 });
@@ -537,153 +550,221 @@
                 alert("Record added successfully!");
             }
             
-            function exportToExcel() {
-                alert("Export to Excel functionality would be implemented here. In a real application, this would generate an Excel file with all the data.");
-                // This would typically use a library like SheetJS to export data
-            }
-            
-            function generateDayNightReport() {
-                const reportDate = document.getElementById('reportDate').value;
+            function generateDispatchReport() {
+                const reportDate = document.getElementById('dispatchReportDate').value;
+                const reportShift = document.getElementById('dispatchReportShift').value;
+                
                 if (!reportDate) {
                     alert("Please select a date for the report.");
                     return;
                 }
                 
-                // Filter records for the selected date
-                const dateRecords = allRecords.filter(record => record.date === reportDate);
+                // Filter records for the selected date and shift
+                let dateRecords;
+                if (reportShift === "ALL") {
+                    dateRecords = allRecords.filter(record => record.date === reportDate);
+                } else {
+                    dateRecords = allRecords.filter(record => record.date === reportDate && record.shift === reportShift);
+                }
                 
                 if (dateRecords.length === 0) {
-                    alert("No records found for the selected date.");
+                    alert("No records found for the selected criteria.");
                     return;
                 }
                 
-                // Initialize report data
-                const reportData = {
-                    Day: { netWt: 0, saleAmount: 0, royaltyAmount: 0, transportAmount: 0 },
-                    Night: { netWt: 0, saleAmount: 0, royaltyAmount: 0, transportAmount: 0 }
-                };
+                // Group records by customer and material
+                const customerData = {};
+                const materialTypes = ["10 MM", "20 MM", "V/SAND", "Scalping", "P/Sand", "40MM", "GSB/WET MIX", "R/Sand"];
                 
-                // Calculate totals by shift
                 dateRecords.forEach(record => {
-                    if (reportData[record.shift]) {
-                        reportData[record.shift].netWt += record.netWt;
-                        reportData[record.shift].saleAmount += record.saleAmount;
-                        reportData[record.shift].royaltyAmount += record.royaltyAmount;
-                        reportData[record.shift].transportAmount += record.transportAmount;
+                    if (!customerData[record.customerName]) {
+                        customerData[record.customerName] = {
+                            vehicles: new Set(),
+                            totalTonnage: 0,
+                            materials: {}
+                        };
+                        
+                        // Initialize all material types
+                        materialTypes.forEach(material => {
+                            customerData[record.customerName].materials[material] = {
+                                vehicles: 0,
+                                tonnage: 0
+                            };
+                        });
+                    }
+                    
+                    // Add vehicle to set (to count unique vehicles)
+                    customerData[record.customerName].vehicles.add(record.vehicleNo);
+                    
+                    // Add to total tonnage
+                    customerData[record.customerName].totalTonnage += record.netWt;
+                    
+                    // Add to specific material
+                    if (customerData[record.customerName].materials[record.materialType]) {
+                        customerData[record.customerName].materials[record.materialType].vehicles += 1;
+                        customerData[record.customerName].materials[record.materialType].tonnage += record.netWt;
                     }
                 });
                 
+                // Create report table
+                let reportHTML = '<table class="table table-bordered">';
+                
+                // Add title row
+                const formattedDate = formatDate(reportDate);
+                if (reportShift === "ALL") {
+                    reportHTML += `<tr class="shift-header"><th colspan="12">ALL SHIFTS - Dispatch Vehicle Wise Planning - ${formattedDate}</th></tr>`;
+                } else {
+                    reportHTML += `<tr class="shift-header"><th colspan="12">${reportShift} - Dispatch Vehicle Wise Planning - ${formattedDate}</th></tr>`;
+                }
+                
+                // Add header row
+                reportHTML += '<tr class="customer-header">';
+                reportHTML += '<th>Customer Name</th>';
+                reportHTML += '<th>Unit (Nos., MT)</th>';
+                materialTypes.forEach(material => {
+                    reportHTML += `<th>${material}</th>`;
+                });
+                reportHTML += '<th>TOTAL</th>';
+                reportHTML += '</tr>';
+                
+                // Add customer rows
+                let grandTotalVehicles = 0;
+                let grandTotalTonnage = 0;
+                const materialTotals = {};
+                materialTypes.forEach(material => {
+                    materialTotals[material] = { vehicles: 0, tonnage: 0 };
+                });
+                
+                for (const customer in customerData) {
+                    // Customer name row
+                    reportHTML += `<tr><td rowspan="2">${customer}</td><td>No. of Vehicles</td>`;
+                    
+                    // Vehicle counts by material
+                    materialTypes.forEach(material => {
+                        const vehicleCount = customerData[customer].materials[material].vehicles;
+                        reportHTML += `<td class="number-cell">${vehicleCount || ''}</td>`;
+                        materialTotals[material].vehicles += vehicleCount;
+                    });
+                    
+                    // Total vehicles for this customer
+                    const customerVehicleCount = customerData[customer].vehicles.size;
+                    reportHTML += `<td class="number-cell">${customerVehicleCount}</td>`;
+                    grandTotalVehicles += customerVehicleCount;
+                    
+                    reportHTML += '</tr>';
+                    
+                    // Tonnage row
+                    reportHTML += `<tr><td>Total Tonnage (MT)</td>`;
+                    
+                    // Tonnage by material
+                    materialTypes.forEach(material => {
+                        const tonnage = customerData[customer].materials[material].tonnage;
+                        reportHTML += `<td class="number-cell">${tonnage > 0 ? tonnage.toFixed(2) : ''}</td>`;
+                        materialTotals[material].tonnage += tonnage;
+                    });
+                    
+                    // Total tonnage for this customer
+                    reportHTML += `<td class="number-cell">${customerData[customer].totalTonnage.toFixed(2)}</td>`;
+                    grandTotalTonnage += customerData[customer].totalTonnage;
+                    
+                    reportHTML += '</tr>';
+                }
+                
+                // Add totals row
+                reportHTML += '<tr class="total-header">';
+                reportHTML += '<td colspan="2">TOTAL</td>';
+                
+                // Vehicle totals by material
+                materialTypes.forEach(material => {
+                    reportHTML += `<td class="number-cell">${materialTotals[material].vehicles > 0 ? materialTotals[material].vehicles : ''}</td>`;
+                });
+                
+                // Grand total vehicles
+                reportHTML += `<td class="number-cell">${grandTotalVehicles}</td>`;
+                reportHTML += '</tr>';
+                
+                // Tonnage totals row
+                reportHTML += '<tr class="total-header">';
+                reportHTML += '<td colspan="2"></td>';
+                
+                // Tonnage totals by material
+                materialTypes.forEach(material => {
+                    reportHTML += `<td class="number-cell">${materialTotals[material].tonnage > 0 ? materialTotals[material].tonnage.toFixed(2) : ''}</td>`;
+                });
+                
+                // Grand total tonnage
+                reportHTML += `<td class="number-cell">${grandTotalTonnage.toFixed(2)}</td>`;
+                reportHTML += '</tr>';
+                
+                reportHTML += '</table>';
+                
+                // Display the report
+                document.getElementById('dispatchReportContainer').innerHTML = reportHTML;
+            }
+            
+            function generateTransportBill() {
+                const reportDate = document.getElementById('transportBillDate').value;
+                const vehicleNo = document.getElementById('transportBillVehicle').value.trim();
+                
+                if (!reportDate) {
+                    alert("Please select a date for the report.");
+                    return;
+                }
+                
+                // Filter records for the selected date and optional vehicle
+                let dateRecords;
+                if (vehicleNo) {
+                    dateRecords = allRecords.filter(record => 
+                        record.date === reportDate && record.vehicleNo === vehicleNo
+                    );
+                } else {
+                    dateRecords = allRecords.filter(record => record.date === reportDate);
+                }
+                
+                if (dateRecords.length === 0) {
+                    alert("No records found for the selected criteria.");
+                    return;
+                }
+                
                 // Update the report table
-                const tableBody = document.querySelector('#dayNightReportTable tbody');
+                const tableBody = document.querySelector('#transportBillTable tbody');
                 tableBody.innerHTML = '';
                 
-                for (const shift in reportData) {
+                let totalTransportAmount = 0;
+                
+                dateRecords.forEach(record => {
                     const row = tableBody.insertRow();
-                    row.insertCell(0).textContent = shift;
-                    row.insertCell(1).textContent = reportData[shift].netWt.toFixed(2);
-                    row.insertCell(2).textContent = reportData[shift].saleAmount.toFixed(2);
-                    row.insertCell(3).textContent = reportData[shift].royaltyAmount.toFixed(2);
-                    row.insertCell(4).textContent = reportData[shift].transportAmount.toFixed(2);
-                }
+                    row.insertCell(0).textContent = record.vehicleNo;
+                    row.insertCell(1).textContent = record.driverName || '-';
+                    row.insertCell(2).textContent = record.date;
+                    row.insertCell(3).textContent = record.shift;
+                    row.insertCell(4).textContent = record.materialType;
+                    row.insertCell(5).textContent = record.netWt.toFixed(2);
+                    row.insertCell(6).textContent = record.transportRate.toFixed(2);
+                    row.insertCell(7).textContent = record.transportAmount.toFixed(2);
+                    
+                    totalTransportAmount += record.transportAmount;
+                });
                 
                 // Add total row
                 const totalRow = tableBody.insertRow();
                 totalRow.classList.add('table-active');
                 totalRow.insertCell(0).textContent = 'TOTAL';
-                totalRow.insertCell(1).textContent = (reportData.Day.netWt + reportData.Night.netWt).toFixed(2);
-                totalRow.insertCell(2).textContent = (reportData.Day.saleAmount + reportData.Night.saleAmount).toFixed(2);
-                totalRow.insertCell(3).textContent = (reportData.Day.royaltyAmount + reportData.Night.royaltyAmount).toFixed(2);
-                totalRow.insertCell(4).textContent = (reportData.Day.transportAmount + reportData.Night.transportAmount).toFixed(2);
+                totalRow.insertCell(1).textContent = '';
+                totalRow.insertCell(2).textContent = '';
+                totalRow.insertCell(3).textContent = '';
+                totalRow.insertCell(4).textContent = '';
+                totalRow.insertCell(5).textContent = '';
+                totalRow.insertCell(6).textContent = '';
+                totalRow.insertCell(7).textContent = totalTransportAmount.toFixed(2);
             }
             
-            function generateCustomerReport() {
-                const reportDate = document.getElementById('customerReportDate').value;
-                if (!reportDate) {
-                    alert("Please select a date for the report.");
-                    return;
-                }
-                
-                // Filter records for the selected date
-                const dateRecords = allRecords.filter(record => record.date === reportDate);
-                
-                if (dateRecords.length === 0) {
-                    alert("No records found for the selected date.");
-                    return;
-                }
-                
-                // Group records by customer
-                const customerData = {};
-                
-                dateRecords.forEach(record => {
-                    if (!customerData[record.customerName]) {
-                        customerData[record.customerName] = {
-                            netWt: 0,
-                            saleAmount: 0,
-                            vehicleCount: 0
-                        };
-                    }
-                    
-                    customerData[record.customerName].netWt += record.netWt;
-                    customerData[record.customerName].saleAmount += record.saleAmount;
-                    customerData[record.customerName].vehicleCount += 1;
-                });
-                
-                // Update the report table
-                const tableBody = document.querySelector('#customerReportTable tbody');
-                tableBody.innerHTML = '';
-                
-                for (const customer in customerData) {
-                    const row = tableBody.insertRow();
-                    row.insertCell(0).textContent = customer;
-                    row.insertCell(1).textContent = customerData[customer].netWt.toFixed(2);
-                    row.insertCell(2).textContent = customerData[customer].saleAmount.toFixed(2);
-                    row.insertCell(3).textContent = customerData[customer].vehicleCount;
-                }
-            }
-            
-            function generateTransportReport() {
-                const reportDate = document.getElementById('transportReportDate').value;
-                if (!reportDate) {
-                    alert("Please select a date for the report.");
-                    return;
-                }
-                
-                // Filter records for the selected date
-                const dateRecords = allRecords.filter(record => record.date === reportDate);
-                
-                if (dateRecords.length === 0) {
-                    alert("No records found for the selected date.");
-                    return;
-                }
-                
-                // Group records by vehicle
-                const vehicleData = {};
-                
-                dateRecords.forEach(record => {
-                    if (!vehicleData[record.vehicleNo]) {
-                        vehicleData[record.vehicleNo] = {
-                            netWt: 0,
-                            transportAmount: 0,
-                            tripCount: 0
-                        };
-                    }
-                    
-                    vehicleData[record.vehicleNo].netWt += record.netWt;
-                    vehicleData[record.vehicleNo].transportAmount += record.transportAmount;
-                    vehicleData[record.vehicleNo].tripCount += 1;
-                });
-                
-                // Update the report table
-                const tableBody = document.querySelector('#transportReportTable tbody');
-                tableBody.innerHTML = '';
-                
-                for (const vehicle in vehicleData) {
-                    const row = tableBody.insertRow();
-                    row.insertCell(0).textContent = vehicle;
-                    row.insertCell(1).textContent = vehicleData[vehicle].netWt.toFixed(2);
-                    row.insertCell(2).textContent = vehicleData[vehicle].transportAmount.toFixed(2);
-                    row.insertCell(3).textContent = vehicleData[vehicle].tripCount;
-                }
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                const day = date.getDate();
+                const month = date.toLocaleString('default', { month: 'short' }).toUpperCase();
+                const year = date.getFullYear();
+                return `${day}-${month}-${year}`;
             }
         });
     </script>
