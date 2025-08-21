@@ -18,7 +18,7 @@
             padding: 25px;
             margin-bottom: 30px;
         }
-        h1 {
+        h1, h2 {
             color: #2c3e50;
             margin-bottom: 25px;
             border-bottom: 2px solid #e9ecef;
@@ -61,6 +61,12 @@
             margin-bottom: 15px;
             border-radius: 5px;
         }
+        .report-section {
+            margin-top: 30px;
+        }
+        .report-table {
+            margin-top: 15px;
+        }
         @media (max-width: 768px) {
             .btn-container {
                 flex-direction: column;
@@ -80,11 +86,18 @@
                     <label for="accountingDate" class="form-label">Accounting Date</label>
                     <input type="date" class="form-control" id="accountingDate" required>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label for="date" class="form-label">Date</label>
                     <input type="date" class="form-control" id="date" required>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label for="shift" class="form-label">Shift</label>
+                    <select class="form-select" id="shift">
+                        <option value="Day">Day</option>
+                        <option value="Night">Night</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <label for="weighmentSlipNo" class="form-label">Weighment Slip No</label>
                     <input type="text" class="form-control" id="weighmentSlipNo">
                 </div>
@@ -102,7 +115,7 @@
                     <input type="text" class="form-control" id="royaltyPermitNo">
                 </div>
                 <div class="col-md-4">
-                    <label for="permitQty" class="form-label">Permit Qty (CM)</label>
+                    <label for="permitQty" class="form-label">Permit Qty (MT)</label>
                     <input type="number" class="form-control" id="permitQty" step="0.01">
                 </div>
                 <div class="col-md-4">
@@ -119,11 +132,11 @@
                     <input type="text" class="form-control" id="customerSrNo">
                 </div>
                 <div class="col-md-5">
-                    <label for="customerName" class="form-label">NAME OF THE CUSTOMER</label>
+                    <label for="customerName" class="form-label">Customer Name</label>
                     <input type="text" class="form-control" id="customerName">
                 </div>
                 <div class="col-md-4">
-                    <label for="clientDetails" class="form-label">CLIENT DETAILS</label>
+                    <label for="clientDetails" class="form-label">Client Details</label>
                     <input type="text" class="form-control" id="clientDetails">
                 </div>
             </div>
@@ -132,7 +145,7 @@
             <div class="section-header">Payment and Vehicle Information</div>
             <div class="row mb-4">
                 <div class="col-md-3">
-                    <label for="paymentMode" class="form-label">PAYMENT TERMS</label>
+                    <label for="paymentMode" class="form-label">Payment Mode</label>
                     <select class="form-select" id="paymentMode">
                         <option value="">Select Payment Mode</option>
                         <option value="Cash">Cash</option>
@@ -143,7 +156,7 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="vehicleNo" class="form-label">VEHICLE NO</label>
+                    <label for="vehicleNo" class="form-label">Vehicle No</label>
                     <input type="text" class="form-control" id="vehicleNo">
                 </div>
                 <div class="col-md-3">
@@ -151,8 +164,8 @@
                     <input type="text" class="form-control" id="material">
                 </div>
                 <div class="col-md-3">
-                    <label for="transporterName" class="form-label">TRANSPORTER NAME</label>
-                    <input type="text" class="form-control" id="transporterName">
+                    <label for="transportRate" class="form-label">Transport Rate</label>
+                    <input type="number" class="form-control" id="transportRate" step="0.01">
                 </div>
             </div>
 
@@ -172,7 +185,7 @@
                     <input type="number" class="form-control calculated" id="netWt" readonly>
                 </div>
                 <div class="col-md-3">
-                    <label for="ratePerTone" class="form-label">RATE PER TONE</label>
+                    <label for="ratePerTone" class="form-label">Rate Per Tone</label>
                     <input type="number" class="form-control" id="ratePerTone" step="0.01">
                 </div>
             </div>
@@ -181,48 +194,36 @@
             <div class="section-header">Financial Information</div>
             <div class="row mb-4">
                 <div class="col-md-3">
-                    <label for="saleAmount" class="form-label">AMOUNT (Calculated)</label>
+                    <label for="saleAmount" class="form-label">Sale Amount (Calculated)</label>
                     <input type="number" class="form-control calculated" id="saleAmount" readonly>
                 </div>
                 <div class="col-md-3">
-                    <label for="cashReceived" class="form-label">CASH RECEIVED</label>
+                    <label for="cashReceived" class="form-label">Cash Received</label>
                     <input type="number" class="form-control" id="cashReceived" step="0.01">
                 </div>
                 <div class="col-md-3">
-                    <label for="advanceReceived" class="form-label">ADVANCE RECEIVED</label>
-                    <input type="number" class="form-control" id="advanceReceived" step="0.01">
+                    <label for="customerBalance" class="form-label">Customer Balance Amount (₹)</label>
+                    <input type="number" class="form-control calculated" id="customerBalance" readonly>
                 </div>
                 <div class="col-md-3">
-                    <label for="customerBalance" class="form-label">CUSTOMER BALANCE AMOUNT (₹)</label>
-                    <input type="number" class="form-control calculated" id="customerBalance" readonly>
+                    <label for="royaltyAmount" class="form-label">Royalty Amount (Calculated)</label>
+                    <input type="number" class="form-control calculated" id="royaltyAmount" readonly>
                 </div>
             </div>
 
             <!-- Additional Information -->
             <div class="section-header">Additional Information</div>
             <div class="row mb-4">
-                <div class="col-md-3">
-                    <label for="royaltyAmount" class="form-label">Royalty Amount (Calculated)</label>
-                    <input type="number" class="form-control calculated" id="royaltyAmount" readonly>
-                </div>
-                <div class="col-md-3">
-                    <label for="transportRate" class="form-label">Transport Rate</label>
-                    <input type="number" class="form-control" id="transportRate" step="0.01">
-                </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="transportAmount" class="form-label">Transport Amount (Calculated)</label>
                     <input type="number" class="form-control calculated" id="transportAmount" readonly>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="totalAmount" class="form-label">Total Amount (Calculated)</label>
                     <input type="number" class="form-control calculated" id="totalAmount" readonly>
                 </div>
-            </div>
-
-            <!-- Remarks Section -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <label for="remarks" class="form-label">REMARKS</label>
+                <div class="col-md-4">
+                    <label for="remarks" class="form-label">Remarks</label>
                     <input type="text" class="form-control" id="remarks">
                 </div>
             </div>
@@ -233,6 +234,7 @@
                 <button type="reset" class="btn btn-secondary">Clear Form</button>
                 <button type="button" class="btn btn-info" id="btnCalculate">Calculate Values</button>
                 <button type="button" class="btn btn-success" id="btnExport">Export to Excel</button>
+                <button type="button" class="btn btn-warning" id="btnGenerateReports">Generate Reports</button>
             </div>
         </form>
     </div>
@@ -246,37 +248,114 @@
                         <th>S.NO</th>
                         <th>Accounting Date</th>
                         <th>Date</th>
+                        <th>Shift</th>
                         <th>Weighment Slip No</th>
-                        <th>Delivery Challan No</th>
-                        <th>Royalty Permit No</th>
-                        <th>Permit Qty (CM)</th>
-                        <th>Customer Sr.No.</th>
                         <th>Customer Name</th>
-                        <th>Client Details</th>
-                        <th>Payment Terms</th>
                         <th>Vehicle No</th>
-                        <th>Material</th>
-                        <th>Gross WT</th>
-                        <th>Tare WT</th>
                         <th>NET WT</th>
-                        <th>Rate Per Tone</th>
-                        <th>Amount</th>
-                        <th>Cash Received</th>
-                        <th>Advance Received</th>
-                        <th>Customer Balance</th>
-                        <th>Remarks</th>
-                        <th>Royalty Rate</th>
-                        <th>Royalty Amount</th>
-                        <th>Transport Rate</th>
-                        <th>Transport Amount</th>
-                        <th>Total Amount</th>
-                        <th>Transporter Name</th>
+                        <th>Sale Amount</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="recordsTable">
                     <tr>
-                        <td colspan="29" class="text-center">No records found</td>
+                        <td colspan="10" class="text-center">No records found</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Reports Section -->
+    <div class="container report-section">
+        <h2>Reports</h2>
+        
+        <!-- Day/Night Sales Report -->
+        <div class="section-header">Day/Night Sales Report</div>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label for="reportDate" class="form-label">Select Date for Report</label>
+                <input type="date" class="form-control" id="reportDate">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-primary form-control" id="btnDayNightReport">Generate Day/Night Report</button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered report-table" id="dayNightReportTable">
+                <thead>
+                    <tr>
+                        <th>Shift</th>
+                        <th>Total NET WT (MT)</th>
+                        <th>Total Sale Amount (₹)</th>
+                        <th>Total Royalty Amount (₹)</th>
+                        <th>Total Transport Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5" class="text-center">No report generated yet</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Customer-wise Report -->
+        <div class="section-header">Customer-wise Dispatch Report</div>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label for="customerReportDate" class="form-label">Select Date for Report</label>
+                <input type="date" class="form-control" id="customerReportDate">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-primary form-control" id="btnCustomerReport">Generate Customer Report</button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered report-table" id="customerReportTable">
+                <thead>
+                    <tr>
+                        <th>Customer Name</th>
+                        <th>Total NET WT (MT)</th>
+                        <th>Total Sale Amount (₹)</th>
+                        <th>Number of Vehicles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="4" class="text-center">No report generated yet</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Transport Report -->
+        <div class="section-header">Transport Report</div>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label for="transportReportDate" class="form-label">Select Date for Report</label>
+                <input type="date" class="form-control" id="transportReportDate">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-primary form-control" id="btnTransportReport">Generate Transport Report</button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered report-table" id="transportReportTable">
+                <thead>
+                    <tr>
+                        <th>Vehicle No</th>
+                        <th>Total NET WT (MT)</th>
+                        <th>Total Transport Amount (₹)</th>
+                        <th>Number of Trips</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="4" class="text-center">No report generated yet</td>
                     </tr>
                 </tbody>
             </table>
@@ -284,11 +363,18 @@
     </div>
 
     <script>
+        // Store all records in an array for reporting
+        let allRecords = [];
+        let recordIdCounter = 1;
+
         document.addEventListener('DOMContentLoaded', function() {
             // Set default dates to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('accountingDate').value = today;
             document.getElementById('date').value = today;
+            document.getElementById('reportDate').value = today;
+            document.getElementById('customerReportDate').value = today;
+            document.getElementById('transportReportDate').value = today;
             
             // Calculate net weight when gross or tare weight changes
             document.getElementById('grossWt').addEventListener('input', calculateValues);
@@ -303,15 +389,19 @@
             // Calculate transport amount when transport rate or net weight changes
             document.getElementById('transportRate').addEventListener('input', calculateValues);
             
-            // Calculate customer balance when cash received or advance received changes
+            // Calculate customer balance when cash received changes
             document.getElementById('cashReceived').addEventListener('input', calculateValues);
-            document.getElementById('advanceReceived').addEventListener('input', calculateValues);
             
             // Manual calculation button
             document.getElementById('btnCalculate').addEventListener('click', calculateAllValues);
             
             // Export to Excel button
             document.getElementById('btnExport').addEventListener('click', exportToExcel);
+            
+            // Report generation buttons
+            document.getElementById('btnDayNightReport').addEventListener('click', generateDayNightReport);
+            document.getElementById('btnCustomerReport').addEventListener('click', generateCustomerReport);
+            document.getElementById('btnTransportReport').addEventListener('click', generateTransportReport);
             
             // Form submission
             document.getElementById('weighmentForm').addEventListener('submit', function(e) {
@@ -347,9 +437,7 @@
                 
                 // Calculate Customer Balance
                 const cashReceived = parseFloat(document.getElementById('cashReceived').value) || 0;
-                const advanceReceived = parseFloat(document.getElementById('advanceReceived').value) || 0;
-                const totalReceived = cashReceived + advanceReceived;
-                const customerBalance = totalAmount - totalReceived;
+                const customerBalance = totalAmount - cashReceived;
                 document.getElementById('customerBalance').value = customerBalance.toFixed(2);
             }
             
@@ -360,6 +448,40 @@
             
             function addRecord() {
                 calculateValues();
+                
+                // Get form values
+                const record = {
+                    id: recordIdCounter++,
+                    accountingDate: document.getElementById('accountingDate').value,
+                    date: document.getElementById('date').value,
+                    shift: document.getElementById('shift').value,
+                    weighmentSlipNo: document.getElementById('weighmentSlipNo').value,
+                    deliveryChallanNo: document.getElementById('deliveryChallanNo').value,
+                    royaltyPermitNo: document.getElementById('royaltyPermitNo').value,
+                    permitQty: parseFloat(document.getElementById('permitQty').value) || 0,
+                    royaltyRate: parseFloat(document.getElementById('royaltyRate').value) || 0,
+                    customerSrNo: document.getElementById('customerSrNo').value,
+                    customerName: document.getElementById('customerName').value,
+                    clientDetails: document.getElementById('clientDetails').value,
+                    paymentMode: document.getElementById('paymentMode').value,
+                    vehicleNo: document.getElementById('vehicleNo').value,
+                    material: document.getElementById('material').value,
+                    transportRate: parseFloat(document.getElementById('transportRate').value) || 0,
+                    grossWt: parseFloat(document.getElementById('grossWt').value) || 0,
+                    tareWt: parseFloat(document.getElementById('tareWt').value) || 0,
+                    netWt: parseFloat(document.getElementById('netWt').value) || 0,
+                    ratePerTone: parseFloat(document.getElementById('ratePerTone').value) || 0,
+                    saleAmount: parseFloat(document.getElementById('saleAmount').value) || 0,
+                    cashReceived: parseFloat(document.getElementById('cashReceived').value) || 0,
+                    customerBalance: parseFloat(document.getElementById('customerBalance').value) || 0,
+                    royaltyAmount: parseFloat(document.getElementById('royaltyAmount').value) || 0,
+                    transportAmount: parseFloat(document.getElementById('transportAmount').value) || 0,
+                    totalAmount: parseFloat(document.getElementById('totalAmount').value) || 0,
+                    remarks: document.getElementById('remarks').value
+                };
+                
+                // Add to records array
+                allRecords.push(record);
                 
                 // Get the table body
                 const tableBody = document.getElementById('recordsTable');
@@ -372,42 +494,27 @@
                 // Create a new row
                 const newRow = tableBody.insertRow();
                 
-                // Add cells with data in the requested serial order
+                // Add cells with data
                 newRow.insertCell(0).textContent = tableBody.rows.length;
-                newRow.insertCell(1).textContent = document.getElementById('accountingDate').value;
-                newRow.insertCell(2).textContent = document.getElementById('date').value;
-                newRow.insertCell(3).textContent = document.getElementById('weighmentSlipNo').value;
-                newRow.insertCell(4).textContent = document.getElementById('deliveryChallanNo').value;
-                newRow.insertCell(5).textContent = document.getElementById('royaltyPermitNo').value;
-                newRow.insertCell(6).textContent = document.getElementById('permitQty').value;
-                newRow.insertCell(7).textContent = document.getElementById('customerSrNo').value;
-                newRow.insertCell(8).textContent = document.getElementById('customerName').value;
-                newRow.insertCell(9).textContent = document.getElementById('clientDetails').value;
-                newRow.insertCell(10).textContent = document.getElementById('paymentMode').value;
-                newRow.insertCell(11).textContent = document.getElementById('vehicleNo').value;
-                newRow.insertCell(12).textContent = document.getElementById('material').value;
-                newRow.insertCell(13).textContent = document.getElementById('grossWt').value;
-                newRow.insertCell(14).textContent = document.getElementById('tareWt').value;
-                newRow.insertCell(15).textContent = document.getElementById('netWt').value;
-                newRow.insertCell(16).textContent = document.getElementById('ratePerTone').value;
-                newRow.insertCell(17).textContent = document.getElementById('saleAmount').value;
-                newRow.insertCell(18).textContent = document.getElementById('cashReceived').value;
-                newRow.insertCell(19).textContent = document.getElementById('advanceReceived').value;
-                newRow.insertCell(20).textContent = document.getElementById('customerBalance').value;
-                newRow.insertCell(21).textContent = document.getElementById('remarks').value;
-                newRow.insertCell(22).textContent = document.getElementById('royaltyRate').value;
-                newRow.insertCell(23).textContent = document.getElementById('royaltyAmount').value;
-                newRow.insertCell(24).textContent = document.getElementById('transportRate').value;
-                newRow.insertCell(25).textContent = document.getElementById('transportAmount').value;
-                newRow.insertCell(26).textContent = document.getElementById('totalAmount').value;
-                newRow.insertCell(27).textContent = document.getElementById('transporterName').value;
+                newRow.insertCell(1).textContent = record.accountingDate;
+                newRow.insertCell(2).textContent = record.date;
+                newRow.insertCell(3).textContent = record.shift;
+                newRow.insertCell(4).textContent = record.weighmentSlipNo;
+                newRow.insertCell(5).textContent = record.customerName;
+                newRow.insertCell(6).textContent = record.vehicleNo;
+                newRow.insertCell(7).textContent = record.netWt.toFixed(2);
+                newRow.insertCell(8).textContent = record.saleAmount.toFixed(2);
                 
                 // Add actions cell
-                const actionsCell = newRow.insertCell(28);
+                const actionsCell = newRow.insertCell(9);
                 actionsCell.innerHTML = '<button class="btn btn-sm btn-info">View</button> <button class="btn btn-sm btn-danger">Delete</button>';
                 
                 // Add event listener to delete button
                 actionsCell.querySelector('.btn-danger').addEventListener('click', function() {
+                    // Remove from records array
+                    allRecords = allRecords.filter(r => r.id !== record.id);
+                    
+                    // Remove from table
                     tableBody.deleteRow(newRow.rowIndex - 1);
                     
                     // If no records left, add the "no records" row
@@ -415,7 +522,7 @@
                         const noRecordsRow = tableBody.insertRow();
                         const cell = noRecordsRow.insertCell(0);
                         cell.textContent = 'No records found';
-                        cell.colSpan = 29;
+                        cell.colSpan = 10;
                         cell.className = 'text-center';
                     }
                 });
@@ -433,6 +540,150 @@
             function exportToExcel() {
                 alert("Export to Excel functionality would be implemented here. In a real application, this would generate an Excel file with all the data.");
                 // This would typically use a library like SheetJS to export data
+            }
+            
+            function generateDayNightReport() {
+                const reportDate = document.getElementById('reportDate').value;
+                if (!reportDate) {
+                    alert("Please select a date for the report.");
+                    return;
+                }
+                
+                // Filter records for the selected date
+                const dateRecords = allRecords.filter(record => record.date === reportDate);
+                
+                if (dateRecords.length === 0) {
+                    alert("No records found for the selected date.");
+                    return;
+                }
+                
+                // Initialize report data
+                const reportData = {
+                    Day: { netWt: 0, saleAmount: 0, royaltyAmount: 0, transportAmount: 0 },
+                    Night: { netWt: 0, saleAmount: 0, royaltyAmount: 0, transportAmount: 0 }
+                };
+                
+                // Calculate totals by shift
+                dateRecords.forEach(record => {
+                    if (reportData[record.shift]) {
+                        reportData[record.shift].netWt += record.netWt;
+                        reportData[record.shift].saleAmount += record.saleAmount;
+                        reportData[record.shift].royaltyAmount += record.royaltyAmount;
+                        reportData[record.shift].transportAmount += record.transportAmount;
+                    }
+                });
+                
+                // Update the report table
+                const tableBody = document.querySelector('#dayNightReportTable tbody');
+                tableBody.innerHTML = '';
+                
+                for (const shift in reportData) {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = shift;
+                    row.insertCell(1).textContent = reportData[shift].netWt.toFixed(2);
+                    row.insertCell(2).textContent = reportData[shift].saleAmount.toFixed(2);
+                    row.insertCell(3).textContent = reportData[shift].royaltyAmount.toFixed(2);
+                    row.insertCell(4).textContent = reportData[shift].transportAmount.toFixed(2);
+                }
+                
+                // Add total row
+                const totalRow = tableBody.insertRow();
+                totalRow.classList.add('table-active');
+                totalRow.insertCell(0).textContent = 'TOTAL';
+                totalRow.insertCell(1).textContent = (reportData.Day.netWt + reportData.Night.netWt).toFixed(2);
+                totalRow.insertCell(2).textContent = (reportData.Day.saleAmount + reportData.Night.saleAmount).toFixed(2);
+                totalRow.insertCell(3).textContent = (reportData.Day.royaltyAmount + reportData.Night.royaltyAmount).toFixed(2);
+                totalRow.insertCell(4).textContent = (reportData.Day.transportAmount + reportData.Night.transportAmount).toFixed(2);
+            }
+            
+            function generateCustomerReport() {
+                const reportDate = document.getElementById('customerReportDate').value;
+                if (!reportDate) {
+                    alert("Please select a date for the report.");
+                    return;
+                }
+                
+                // Filter records for the selected date
+                const dateRecords = allRecords.filter(record => record.date === reportDate);
+                
+                if (dateRecords.length === 0) {
+                    alert("No records found for the selected date.");
+                    return;
+                }
+                
+                // Group records by customer
+                const customerData = {};
+                
+                dateRecords.forEach(record => {
+                    if (!customerData[record.customerName]) {
+                        customerData[record.customerName] = {
+                            netWt: 0,
+                            saleAmount: 0,
+                            vehicleCount: 0
+                        };
+                    }
+                    
+                    customerData[record.customerName].netWt += record.netWt;
+                    customerData[record.customerName].saleAmount += record.saleAmount;
+                    customerData[record.customerName].vehicleCount += 1;
+                });
+                
+                // Update the report table
+                const tableBody = document.querySelector('#customerReportTable tbody');
+                tableBody.innerHTML = '';
+                
+                for (const customer in customerData) {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = customer;
+                    row.insertCell(1).textContent = customerData[customer].netWt.toFixed(2);
+                    row.insertCell(2).textContent = customerData[customer].saleAmount.toFixed(2);
+                    row.insertCell(3).textContent = customerData[customer].vehicleCount;
+                }
+            }
+            
+            function generateTransportReport() {
+                const reportDate = document.getElementById('transportReportDate').value;
+                if (!reportDate) {
+                    alert("Please select a date for the report.");
+                    return;
+                }
+                
+                // Filter records for the selected date
+                const dateRecords = allRecords.filter(record => record.date === reportDate);
+                
+                if (dateRecords.length === 0) {
+                    alert("No records found for the selected date.");
+                    return;
+                }
+                
+                // Group records by vehicle
+                const vehicleData = {};
+                
+                dateRecords.forEach(record => {
+                    if (!vehicleData[record.vehicleNo]) {
+                        vehicleData[record.vehicleNo] = {
+                            netWt: 0,
+                            transportAmount: 0,
+                            tripCount: 0
+                        };
+                    }
+                    
+                    vehicleData[record.vehicleNo].netWt += record.netWt;
+                    vehicleData[record.vehicleNo].transportAmount += record.transportAmount;
+                    vehicleData[record.vehicleNo].tripCount += 1;
+                });
+                
+                // Update the report table
+                const tableBody = document.querySelector('#transportReportTable tbody');
+                tableBody.innerHTML = '';
+                
+                for (const vehicle in vehicleData) {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = vehicle;
+                    row.insertCell(1).textContent = vehicleData[vehicle].netWt.toFixed(2);
+                    row.insertCell(2).textContent = vehicleData[vehicle].transportAmount.toFixed(2);
+                    row.insertCell(3).textContent = vehicleData[vehicle].tripCount;
+                }
             }
         });
     </script>
