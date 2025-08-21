@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weighment Data Entry System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -62,23 +61,9 @@
             margin-bottom: 15px;
             border-radius: 5px;
         }
-        .shift-options {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        .shift-option {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
         @media (max-width: 768px) {
             .btn-container {
                 flex-direction: column;
-            }
-            .shift-options {
-                flex-direction: column;
-                align-items: flex-start;
             }
         }
     </style>
@@ -91,26 +76,13 @@
             <!-- Basic Information Section -->
             <div class="section-header">Basic Information</div>
             <div class="row mb-4">
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label for="accountingDate" class="form-label">Accounting Date</label>
                     <input type="date" class="form-control" id="accountingDate" required>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label for="date" class="form-label">Date</label>
                     <input type="date" class="form-control" id="date" required>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Shift</label>
-                    <div class="shift-options">
-                        <div class="shift-option">
-                            <input type="radio" id="dayShift" name="shift" value="Day" checked>
-                            <label for="dayShift">Day</label>
-                        </div>
-                        <div class="shift-option">
-                            <input type="radio" id="nightShift" name="shift" value="Night">
-                            <label for="nightShift">Night</label>
-                        </div>
-                    </div>
                 </div>
                 <div class="col-md-3">
                     <label for="weighmentSlipNo" class="form-label">Weighment Slip No</label>
@@ -130,7 +102,7 @@
                     <input type="text" class="form-control" id="royaltyPermitNo">
                 </div>
                 <div class="col-md-4">
-                    <label for="permitQty" class="form-label">Permit Qty (MT)</label>
+                    <label for="permitQty" class="form-label">Permit Qty (CM)</label>
                     <input type="number" class="form-control" id="permitQty" step="0.01">
                 </div>
                 <div class="col-md-4">
@@ -147,11 +119,11 @@
                     <input type="text" class="form-control" id="customerSrNo">
                 </div>
                 <div class="col-md-5">
-                    <label for="customerName" class="form-label">Customer Name</label>
+                    <label for="customerName" class="form-label">NAME OF THE CUSTOMER</label>
                     <input type="text" class="form-control" id="customerName">
                 </div>
                 <div class="col-md-4">
-                    <label for="clientDetails" class="form-label">Client Details</label>
+                    <label for="clientDetails" class="form-label">CLIENT DETAILS</label>
                     <input type="text" class="form-control" id="clientDetails">
                 </div>
             </div>
@@ -160,15 +132,18 @@
             <div class="section-header">Payment and Vehicle Information</div>
             <div class="row mb-4">
                 <div class="col-md-3">
-                    <label for="paymentMode" class="form-label">Payment Mode</label>
+                    <label for="paymentMode" class="form-label">PAYMENT TERMS</label>
                     <select class="form-select" id="paymentMode">
                         <option value="">Select Payment Mode</option>
                         <option value="Cash">Cash</option>
+                        <option value="Card">Card</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
                         <option value="Credit">Credit</option>
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="vehicleNo" class="form-label">Vehicle No</label>
+                    <label for="vehicleNo" class="form-label">VEHICLE NO</label>
                     <input type="text" class="form-control" id="vehicleNo">
                 </div>
                 <div class="col-md-3">
@@ -176,8 +151,8 @@
                     <input type="text" class="form-control" id="material">
                 </div>
                 <div class="col-md-3">
-                    <label for="transportRate" class="form-label">Transport Rate</label>
-                    <input type="number" class="form-control" id="transportRate" step="0.01">
+                    <label for="transporterName" class="form-label">TRANSPORTER NAME</label>
+                    <input type="text" class="form-control" id="transporterName">
                 </div>
             </div>
 
@@ -197,7 +172,7 @@
                     <input type="number" class="form-control calculated" id="netWt" readonly>
                 </div>
                 <div class="col-md-3">
-                    <label for="ratePerTone" class="form-label">Rate Per Tone</label>
+                    <label for="ratePerTone" class="form-label">RATE PER TONE</label>
                     <input type="number" class="form-control" id="ratePerTone" step="0.01">
                 </div>
             </div>
@@ -206,36 +181,48 @@
             <div class="section-header">Financial Information</div>
             <div class="row mb-4">
                 <div class="col-md-3">
-                    <label for="saleAmount" class="form-label">Sale Amount (Calculated)</label>
+                    <label for="saleAmount" class="form-label">AMOUNT (Calculated)</label>
                     <input type="number" class="form-control calculated" id="saleAmount" readonly>
                 </div>
                 <div class="col-md-3">
-                    <label for="cashReceived" class="form-label">Cash Received</label>
+                    <label for="cashReceived" class="form-label">CASH RECEIVED</label>
                     <input type="number" class="form-control" id="cashReceived" step="0.01">
                 </div>
                 <div class="col-md-3">
-                    <label for="customerBalance" class="form-label">Customer Balance Amount (₹)</label>
-                    <input type="number" class="form-control calculated" id="customerBalance" readonly>
+                    <label for="advanceReceived" class="form-label">ADVANCE RECEIVED</label>
+                    <input type="number" class="form-control" id="advanceReceived" step="0.01">
                 </div>
                 <div class="col-md-3">
-                    <label for="royaltyAmount" class="form-label">Royalty Amount (Calculated)</label>
-                    <input type="number" class="form-control calculated" id="royaltyAmount" readonly>
+                    <label for="customerBalance" class="form-label">CUSTOMER BALANCE AMOUNT (₹)</label>
+                    <input type="number" class="form-control calculated" id="customerBalance" readonly>
                 </div>
             </div>
 
             <!-- Additional Information -->
             <div class="section-header">Additional Information</div>
             <div class="row mb-4">
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <label for="royaltyAmount" class="form-label">Royalty Amount (Calculated)</label>
+                    <input type="number" class="form-control calculated" id="royaltyAmount" readonly>
+                </div>
+                <div class="col-md-3">
+                    <label for="transportRate" class="form-label">Transport Rate</label>
+                    <input type="number" class="form-control" id="transportRate" step="0.01">
+                </div>
+                <div class="col-md-3">
                     <label for="transportAmount" class="form-label">Transport Amount (Calculated)</label>
                     <input type="number" class="form-control calculated" id="transportAmount" readonly>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="totalAmount" class="form-label">Total Amount (Calculated)</label>
                     <input type="number" class="form-control calculated" id="totalAmount" readonly>
                 </div>
-                <div class="col-md-4">
-                    <label for="remarks" class="form-label">Remarks</label>
+            </div>
+
+            <!-- Remarks Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label for="remarks" class="form-label">REMARKS</label>
                     <input type="text" class="form-control" id="remarks">
                 </div>
             </div>
@@ -246,36 +233,12 @@
                 <button type="reset" class="btn btn-secondary">Clear Form</button>
                 <button type="button" class="btn btn-info" id="btnCalculate">Calculate Values</button>
                 <button type="button" class="btn btn-success" id="btnExport">Export to Excel</button>
-                <button type="button" class="btn btn-warning" id="btnExportFiltered">Export Filtered Data</button>
             </div>
         </form>
     </div>
 
     <div class="container">
         <h2>Data Records</h2>
-        <div class="row mb-3">
-            <div class="col-md-3">
-                <select class="form-select" id="filterShift">
-                    <option value="all">All Shifts</option>
-                    <option value="Day">Day Shift</option>
-                    <option value="Night">Night Shift</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select class="form-select" id="filterPayment">
-                    <option value="all">All Payment Modes</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Credit">Credit</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <input type="date" class="form-control" id="filterDate">
-            </div>
-            <div class="col-md-3">
-                <button class="btn btn-outline-primary" id="btnApplyFilters">Apply Filters</button>
-                <button class="btn btn-outline-secondary" id="btnClearFilters">Clear Filters</button>
-            </div>
-        </div>
         <div class="table-responsive">
             <table class="table table-striped table-bordered">
                 <thead>
@@ -283,19 +246,37 @@
                         <th>S.NO</th>
                         <th>Accounting Date</th>
                         <th>Date</th>
-                        <th>Shift</th>
                         <th>Weighment Slip No</th>
+                        <th>Delivery Challan No</th>
+                        <th>Royalty Permit No</th>
+                        <th>Permit Qty (CM)</th>
+                        <th>Customer Sr.No.</th>
                         <th>Customer Name</th>
+                        <th>Client Details</th>
+                        <th>Payment Terms</th>
                         <th>Vehicle No</th>
-                        <th>Payment Mode</th>
+                        <th>Material</th>
+                        <th>Gross WT</th>
+                        <th>Tare WT</th>
                         <th>NET WT</th>
-                        <th>Sale Amount</th>
+                        <th>Rate Per Tone</th>
+                        <th>Amount</th>
+                        <th>Cash Received</th>
+                        <th>Advance Received</th>
+                        <th>Customer Balance</th>
+                        <th>Remarks</th>
+                        <th>Royalty Rate</th>
+                        <th>Royalty Amount</th>
+                        <th>Transport Rate</th>
+                        <th>Transport Amount</th>
+                        <th>Total Amount</th>
+                        <th>Transporter Name</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="recordsTable">
                     <tr>
-                        <td colspan="11" class="text-center">No records found</td>
+                        <td colspan="29" class="text-center">No records found</td>
                     </tr>
                 </tbody>
             </table>
@@ -303,10 +284,6 @@
     </div>
 
     <script>
-        // Store all records in memory
-        let allRecords = [];
-        let currentRecordId = 1;
-        
         document.addEventListener('DOMContentLoaded', function() {
             // Set default dates to today
             const today = new Date().toISOString().split('T')[0];
@@ -326,25 +303,21 @@
             // Calculate transport amount when transport rate or net weight changes
             document.getElementById('transportRate').addEventListener('input', calculateValues);
             
-            // Calculate customer balance when cash received changes
+            // Calculate customer balance when cash received or advance received changes
             document.getElementById('cashReceived').addEventListener('input', calculateValues);
+            document.getElementById('advanceReceived').addEventListener('input', calculateValues);
             
             // Manual calculation button
             document.getElementById('btnCalculate').addEventListener('click', calculateAllValues);
             
-            // Export to Excel buttons
+            // Export to Excel button
             document.getElementById('btnExport').addEventListener('click', exportToExcel);
-            document.getElementById('btnExportFiltered').addEventListener('click', exportFilteredToExcel);
             
             // Form submission
             document.getElementById('weighmentForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 addRecord();
             });
-            
-            // Filter functionality
-            document.getElementById('btnApplyFilters').addEventListener('click', applyFilters);
-            document.getElementById('btnClearFilters').addEventListener('click', clearFilters);
             
             function calculateValues() {
                 // Calculate Net Weight
@@ -374,7 +347,9 @@
                 
                 // Calculate Customer Balance
                 const cashReceived = parseFloat(document.getElementById('cashReceived').value) || 0;
-                const customerBalance = totalAmount - cashReceived;
+                const advanceReceived = parseFloat(document.getElementById('advanceReceived').value) || 0;
+                const totalReceived = cashReceived + advanceReceived;
+                const customerBalance = totalAmount - totalReceived;
                 document.getElementById('customerBalance').value = customerBalance.toFixed(2);
             }
             
@@ -386,42 +361,64 @@
             function addRecord() {
                 calculateValues();
                 
-                // Get form values
-                const record = {
-                    id: currentRecordId++,
-                    accountingDate: document.getElementById('accountingDate').value,
-                    date: document.getElementById('date').value,
-                    shift: document.querySelector('input[name="shift"]:checked').value,
-                    weighmentSlipNo: document.getElementById('weighmentSlipNo').value,
-                    deliveryChallanNo: document.getElementById('deliveryChallanNo').value,
-                    royaltyPermitNo: document.getElementById('royaltyPermitNo').value,
-                    permitQty: document.getElementById('permitQty').value,
-                    royaltyRate: document.getElementById('royaltyRate').value,
-                    customerSrNo: document.getElementById('customerSrNo').value,
-                    customerName: document.getElementById('customerName').value,
-                    clientDetails: document.getElementById('clientDetails').value,
-                    paymentMode: document.getElementById('paymentMode').value,
-                    vehicleNo: document.getElementById('vehicleNo').value,
-                    material: document.getElementById('material').value,
-                    transportRate: document.getElementById('transportRate').value,
-                    grossWt: document.getElementById('grossWt').value,
-                    tareWt: document.getElementById('tareWt').value,
-                    netWt: document.getElementById('netWt').value,
-                    ratePerTone: document.getElementById('ratePerTone').value,
-                    saleAmount: document.getElementById('saleAmount').value,
-                    cashReceived: document.getElementById('cashReceived').value,
-                    customerBalance: document.getElementById('customerBalance').value,
-                    royaltyAmount: document.getElementById('royaltyAmount').value,
-                    transportAmount: document.getElementById('transportAmount').value,
-                    totalAmount: document.getElementById('totalAmount').value,
-                    remarks: document.getElementById('remarks').value
-                };
+                // Get the table body
+                const tableBody = document.getElementById('recordsTable');
                 
-                // Add to all records
-                allRecords.push(record);
+                // Check if the table has the "no records" row and remove it
+                if (tableBody.rows.length === 1 && tableBody.rows[0].cells[0].colSpan > 1) {
+                    tableBody.deleteRow(0);
+                }
                 
-                // Update the table
-                updateRecordsTable(allRecords);
+                // Create a new row
+                const newRow = tableBody.insertRow();
+                
+                // Add cells with data in the requested serial order
+                newRow.insertCell(0).textContent = tableBody.rows.length;
+                newRow.insertCell(1).textContent = document.getElementById('accountingDate').value;
+                newRow.insertCell(2).textContent = document.getElementById('date').value;
+                newRow.insertCell(3).textContent = document.getElementById('weighmentSlipNo').value;
+                newRow.insertCell(4).textContent = document.getElementById('deliveryChallanNo').value;
+                newRow.insertCell(5).textContent = document.getElementById('royaltyPermitNo').value;
+                newRow.insertCell(6).textContent = document.getElementById('permitQty').value;
+                newRow.insertCell(7).textContent = document.getElementById('customerSrNo').value;
+                newRow.insertCell(8).textContent = document.getElementById('customerName').value;
+                newRow.insertCell(9).textContent = document.getElementById('clientDetails').value;
+                newRow.insertCell(10).textContent = document.getElementById('paymentMode').value;
+                newRow.insertCell(11).textContent = document.getElementById('vehicleNo').value;
+                newRow.insertCell(12).textContent = document.getElementById('material').value;
+                newRow.insertCell(13).textContent = document.getElementById('grossWt').value;
+                newRow.insertCell(14).textContent = document.getElementById('tareWt').value;
+                newRow.insertCell(15).textContent = document.getElementById('netWt').value;
+                newRow.insertCell(16).textContent = document.getElementById('ratePerTone').value;
+                newRow.insertCell(17).textContent = document.getElementById('saleAmount').value;
+                newRow.insertCell(18).textContent = document.getElementById('cashReceived').value;
+                newRow.insertCell(19).textContent = document.getElementById('advanceReceived').value;
+                newRow.insertCell(20).textContent = document.getElementById('customerBalance').value;
+                newRow.insertCell(21).textContent = document.getElementById('remarks').value;
+                newRow.insertCell(22).textContent = document.getElementById('royaltyRate').value;
+                newRow.insertCell(23).textContent = document.getElementById('royaltyAmount').value;
+                newRow.insertCell(24).textContent = document.getElementById('transportRate').value;
+                newRow.insertCell(25).textContent = document.getElementById('transportAmount').value;
+                newRow.insertCell(26).textContent = document.getElementById('totalAmount').value;
+                newRow.insertCell(27).textContent = document.getElementById('transporterName').value;
+                
+                // Add actions cell
+                const actionsCell = newRow.insertCell(28);
+                actionsCell.innerHTML = '<button class="btn btn-sm btn-info">View</button> <button class="btn btn-sm btn-danger">Delete</button>';
+                
+                // Add event listener to delete button
+                actionsCell.querySelector('.btn-danger').addEventListener('click', function() {
+                    tableBody.deleteRow(newRow.rowIndex - 1);
+                    
+                    // If no records left, add the "no records" row
+                    if (tableBody.rows.length === 0) {
+                        const noRecordsRow = tableBody.insertRow();
+                        const cell = noRecordsRow.insertCell(0);
+                        cell.textContent = 'No records found';
+                        cell.colSpan = 29;
+                        cell.className = 'text-center';
+                    }
+                });
                 
                 // Reset the form
                 document.getElementById('weighmentForm').reset();
@@ -430,212 +427,12 @@
                 document.getElementById('accountingDate').value = today;
                 document.getElementById('date').value = today;
                 
-                // Set default shift to Day
-                document.getElementById('dayShift').checked = true;
-                
                 alert("Record added successfully!");
             }
             
-            function updateRecordsTable(records) {
-                const tableBody = document.getElementById('recordsTable');
-                tableBody.innerHTML = '';
-                
-                if (records.length === 0) {
-                    const row = tableBody.insertRow();
-                    const cell = row.insertCell(0);
-                    cell.textContent = 'No records found';
-                    cell.colSpan = 11;
-                    cell.className = 'text-center';
-                    return;
-                }
-                
-                records.forEach(record => {
-                    const row = tableBody.insertRow();
-                    
-                    row.insertCell(0).textContent = record.id;
-                    row.insertCell(1).textContent = record.accountingDate;
-                    row.insertCell(2).textContent = record.date;
-                    row.insertCell(3).textContent = record.shift;
-                    row.insertCell(4).textContent = record.weighmentSlipNo;
-                    row.insertCell(5).textContent = record.customerName;
-                    row.insertCell(6).textContent = record.vehicleNo;
-                    row.insertCell(7).textContent = record.paymentMode;
-                    row.insertCell(8).textContent = record.netWt;
-                    row.insertCell(9).textContent = record.saleAmount;
-                    
-                    // Add actions cell
-                    const actionsCell = row.insertCell(10);
-                    actionsCell.innerHTML = '<button class="btn btn-sm btn-info">View</button> <button class="btn btn-sm btn-danger">Delete</button>';
-                    
-                    // Add event listener to delete button
-                    actionsCell.querySelector('.btn-danger').addEventListener('click', function() {
-                        // Remove from allRecords
-                        allRecords = allRecords.filter(r => r.id !== record.id);
-                        
-                        // Update the table
-                        updateRecordsTable(allRecords);
-                    });
-                    
-                    // Add event listener to view button
-                    actionsCell.querySelector('.btn-info').addEventListener('click', function() {
-                        viewRecord(record);
-                    });
-                });
-            }
-            
-            function viewRecord(record) {
-                // This would typically open a modal with all record details
-                alert(`Record Details:\nCustomer: ${record.customerName}\nVehicle: ${record.vehicleNo}\nNet Weight: ${record.netWt}\nTotal Amount: ${record.totalAmount}`);
-            }
-            
-            function applyFilters() {
-                const shiftFilter = document.getElementById('filterShift').value;
-                const paymentFilter = document.getElementById('filterPayment').value;
-                const dateFilter = document.getElementById('filterDate').value;
-                
-                let filteredRecords = allRecords;
-                
-                if (shiftFilter !== 'all') {
-                    filteredRecords = filteredRecords.filter(record => record.shift === shiftFilter);
-                }
-                
-                if (paymentFilter !== 'all') {
-                    filteredRecords = filteredRecords.filter(record => record.paymentMode === paymentFilter);
-                }
-                
-                if (dateFilter) {
-                    filteredRecords = filteredRecords.filter(record => record.date === dateFilter);
-                }
-                
-                updateRecordsTable(filteredRecords);
-            }
-            
-            function clearFilters() {
-                document.getElementById('filterShift').value = 'all';
-                document.getElementById('filterPayment').value = 'all';
-                document.getElementById('filterDate').value = '';
-                
-                updateRecordsTable(allRecords);
-            }
-            
             function exportToExcel() {
-                if (allRecords.length === 0) {
-                    alert("No records to export!");
-                    return;
-                }
-                
-                // Prepare data for export
-                const data = allRecords.map(record => ({
-                    'S.No': record.id,
-                    'Accounting Date': record.accountingDate,
-                    'Date': record.date,
-                    'Shift': record.shift,
-                    'Weighment Slip No': record.weighmentSlipNo,
-                    'Delivery Challan No': record.deliveryChallanNo,
-                    'Royalty Permit No': record.royaltyPermitNo,
-                    'Permit Qty (MT)': record.permitQty,
-                    'Royalty Rate': record.royaltyRate,
-                    'Customer Sr.No.': record.customerSrNo,
-                    'Customer Name': record.customerName,
-                    'Client Details': record.clientDetails,
-                    'Payment Mode': record.paymentMode,
-                    'Vehicle No': record.vehicleNo,
-                    'Material': record.material,
-                    'Transport Rate': record.transportRate,
-                    'Gross WT': record.grossWt,
-                    'Tare WT': record.tareWt,
-                    'NET WT': record.netWt,
-                    'Rate Per Tone': record.ratePerTone,
-                    'Sale Amount': record.saleAmount,
-                    'Cash Received': record.cashReceived,
-                    'Customer Balance': record.customerBalance,
-                    'Royalty Amount': record.royaltyAmount,
-                    'Transport Amount': record.transportAmount,
-                    'Total Amount': record.totalAmount,
-                    'Remarks': record.remarks
-                }));
-                
-                // Create worksheet
-                const ws = XLSX.utils.json_to_sheet(data);
-                
-                // Create workbook
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'Weighment Data');
-                
-                // Export to Excel
-                XLSX.writeFile(wb, 'Weighment_Data_All_Records.xlsx');
-            }
-            
-            function exportFilteredToExcel() {
-                const shiftFilter = document.getElementById('filterShift').value;
-                const paymentFilter = document.getElementById('filterPayment').value;
-                const dateFilter = document.getElementById('filterDate').value;
-                
-                let filteredRecords = allRecords;
-                
-                if (shiftFilter !== 'all') {
-                    filteredRecords = filteredRecords.filter(record => record.shift === shiftFilter);
-                }
-                
-                if (paymentFilter !== 'all') {
-                    filteredRecords = filteredRecords.filter(record => record.paymentMode === paymentFilter);
-                }
-                
-                if (dateFilter) {
-                    filteredRecords = filteredRecords.filter(record => record.date === dateFilter);
-                }
-                
-                if (filteredRecords.length === 0) {
-                    alert("No records match the current filters!");
-                    return;
-                }
-                
-                // Prepare data for export
-                const data = filteredRecords.map(record => ({
-                    'S.No': record.id,
-                    'Accounting Date': record.accountingDate,
-                    'Date': record.date,
-                    'Shift': record.shift,
-                    'Weighment Slip No': record.weighmentSlipNo,
-                    'Delivery Challan No': record.deliveryChallanNo,
-                    'Royalty Permit No': record.royaltyPermitNo,
-                    'Permit Qty (MT)': record.permitQty,
-                    'Royalty Rate': record.royaltyRate,
-                    'Customer Sr.No.': record.customerSrNo,
-                    'Customer Name': record.customerName,
-                    'Client Details': record.clientDetails,
-                    'Payment Mode': record.paymentMode,
-                    'Vehicle No': record.vehicleNo,
-                    'Material': record.material,
-                    'Transport Rate': record.transportRate,
-                    'Gross WT': record.grossWt,
-                    'Tare WT': record.tareWt,
-                    'NET WT': record.netWt,
-                    'Rate Per Tone': record.ratePerTone,
-                    'Sale Amount': record.saleAmount,
-                    'Cash Received': record.cashReceived,
-                    'Customer Balance': record.customerBalance,
-                    'Royalty Amount': record.royaltyAmount,
-                    'Transport Amount': record.transportAmount,
-                    'Total Amount': record.totalAmount,
-                    'Remarks': record.remarks
-                }));
-                
-                // Create worksheet
-                const ws = XLSX.utils.json_to_sheet(data);
-                
-                // Create workbook
-                const wb = XLSX.utils.book_new();
-                
-                let fileName = 'Weighment_Data';
-                if (shiftFilter !== 'all') fileName += `_${shiftFilter}`;
-                if (paymentFilter !== 'all') fileName += `_${paymentFilter}`;
-                if (dateFilter) fileName += `_${dateFilter}`;
-                
-                XLSX.utils.book_append_sheet(wb, ws, 'Weighment Data');
-                
-                // Export to Excel
-                XLSX.writeFile(wb, `${fileName}.xlsx`);
+                alert("Export to Excel functionality would be implemented here. In a real application, this would generate an Excel file with all the data.");
+                // This would typically use a library like SheetJS to export data
             }
         });
     </script>
