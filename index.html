@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weighment Data Entry System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Add SheetJS library for Excel export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -89,6 +91,19 @@
             gap: 10px;
             margin-bottom: 10px;
         }
+        .transaction-details {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .transaction-row {
+            border-bottom: 1px solid #dee2e6;
+            padding: 5px 0;
+        }
+        .transaction-row:last-child {
+            border-bottom: none;
+        }
         @media (max-width: 768px) {
             .btn-container {
                 flex-direction: column;
@@ -102,7 +117,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Dispatch Weight_Bridge_Billing</h1>
+        <h1>Weighment Data Entry System</h1>
         
         <form id="weighmentForm">
             <!-- Basic Information Section -->
@@ -222,10 +237,6 @@
                     <input type="text" class="form-control mt-2" id="vehicleNo" placeholder="Or enter vehicle number">
                 </div>
                 <div class="col-md-4">
-                    <label for="driverName" class="form-label">Driver Name</label>
-                    <input type="text" class="form-control" id="driverName">
-                </div>
-                <div class="col-md-4">
                     <label for="transportRate" class="form-label">Transport Rate</label>
                     <input type="number" class="form-control" id="transportRate" step="0.01">
                 </div>
@@ -311,6 +322,7 @@
                 <button type="reset" class="btn btn-secondary">Clear Form</button>
                 <button type="button" class="btn btn-info" id="btnCalculate">Calculate</button>
                 <button type="button" class="btn btn-warning" id="btnGenerateReports">Reports</button>
+                <button type="button" class="btn btn-primary" id="btnExportExcel">Export to Excel</button>
             </div>
         </form>
     </div>
@@ -318,7 +330,7 @@
     <div class="container">
         <h2>Data Records</h2>
         <div class="table-responsive">
-            <table class="table table-striped table-bordered">
+            <table class="table table-striped table-bordered" id="mainDataTable">
                 <thead>
                     <tr>
                         <th>S.NO</th>
@@ -392,8 +404,12 @@
         <div class="section-header">Transport Bill Report</div>
         <div class="row mb-4">
             <div class="col-md-4">
-                <label for="transportBillDate" class="form-label">Select Date for Report</label>
-                <input type="date" class="form-control" id="transportBillDate">
+                <label for="transportBillDate" class="form-label">Select Date Range</label>
+                <div class="input-group">
+                    <input type="date" class="form-control" id="transportBillStartDate">
+                    <span class="input-group-text">to</span>
+                    <input type="date" class="form-control" id="transportBillEndDate">
+                </div>
             </div>
             <div class="col-md-3">
                 <label for="transportBillVehicle" class="form-label">Vehicle No (Optional)</label>
@@ -409,19 +425,15 @@
                 <thead>
                     <tr>
                         <th>Vehicle No</th>
-                        <th>Driver Name</th>
-                        <th>Date</th>
-                        <th>Shift</th>
-                        <th>Material</th>
-                        <th>NET WT (MT)</th>
-                        <th>Trips</th>
-                        <th>Transport Rate</th>
-                        <th>Transport Amount</th>
+                        <th>Total Trips</th>
+                        <th>Total NET WT (MT)</th>
+                        <th>Total Transport Amount</th>
+                        <th>Transaction Details</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="9" class="text-center">No report generated yet</td>
+                        <td colspan="5" class="text-center">No report generated yet</td>
                     </tr>
                 </tbody>
             </table>
@@ -479,7 +491,8 @@
             document.getElementById('accountingDate').value = today;
             document.getElementById('date').value = today;
             document.getElementById('dispatchReportDate').value = today;
-            document.getElementById('transportBillDate').value = today;
+            document.getElementById('transportBillStartDate').value = today;
+            document.getElementById('transportBillEndDate').value = today;
             
             // Event listeners for calculations
             document.getElementById('grossWt').addEventListener('input', calculateValues);
@@ -545,6 +558,9 @@
                 addRecord();
             });
             
+            // Export to Excel button
+            document.getElementById('btnExportExcel').addEventListener('click', exportToExcel);
+            
             function calculateValues() {
                 // Calculate Net Weight
                 const grossWt = parseFloat(document.getElementById('grossWt').value) || 0;
@@ -602,7 +618,6 @@
                     clientDetails: document.getElementById('clientDetails').value,
                     paymentMode: document.getElementById('paymentMode').value,
                     vehicleNo: document.getElementById('vehicleNo').value,
-                    driverName: document.getElementById('driverName').value,
                     materialType: document.getElementById('materialType').value,
                     transportRate: parseFloat(document.getElementById('transportRate').value) || 0,
                     grossWt: parseFloat(document.getElementById('grossWt').value) || 0,
@@ -886,22 +901,28 @@
             }
             
             function generateTransportBill() {
-                const reportDate = document.getElementById('transportBillDate').value;
+                const startDate = document.getElementById('transportBillStartDate').value;
+                const endDate = document.getElementById('transportBillEndDate').value;
                 const vehicleNo = document.getElementById('transportBillVehicle').value.trim();
                 
-                if (!reportDate) {
-                    alert("Please select a date for the report.");
+                if (!startDate || !endDate) {
+                    alert("Please select a date range for the report.");
                     return;
                 }
                 
-                // Filter records for the selected date and optional vehicle
+                // Filter records for the selected date range and optional vehicle
                 let dateRecords;
                 if (vehicleNo) {
                     dateRecords = allRecords.filter(record => 
-                        record.date === reportDate && record.vehicleNo === vehicleNo
+                        record.date >= startDate && 
+                        record.date <= endDate && 
+                        record.vehicleNo === vehicleNo
                     );
                 } else {
-                    dateRecords = allRecords.filter(record => record.date === reportDate);
+                    dateRecords = allRecords.filter(record => 
+                        record.date >= startDate && 
+                        record.date <= endDate
+                    );
                 }
                 
                 if (dateRecords.length === 0) {
@@ -915,20 +936,30 @@
                 dateRecords.forEach(record => {
                     if (!vehicleData[record.vehicleNo]) {
                         vehicleData[record.vehicleNo] = {
-                            driverName: record.driverName || '-',
                             trips: 0,
                             totalTonnage: 0,
-                            transportRate: record.transportRate,
                             transportAmount: 0,
-                            records: []
+                            transactions: []
                         };
                     }
                     
                     vehicleData[record.vehicleNo].trips += 1;
                     vehicleData[record.vehicleNo].totalTonnage += record.netWt;
                     vehicleData[record.vehicleNo].transportAmount += record.transportAmount;
-                    vehicleData[record.vehicleNo].records.push(record);
+                    vehicleData[record.vehicleNo].transactions.push({
+                        date: record.date,
+                        shift: record.shift,
+                        material: record.materialType,
+                        netWt: record.netWt,
+                        transportRate: record.transportRate,
+                        transportAmount: record.transportAmount
+                    });
                 });
+                
+                // Sort transactions by date
+                for (const vehicle in vehicleData) {
+                    vehicleData[vehicle].transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+                }
                 
                 // Update the report table
                 const tableBody = document.querySelector('#transportBillTable tbody');
@@ -943,14 +974,30 @@
                     
                     const row = tableBody.insertRow();
                     row.insertCell(0).textContent = vehicle;
-                    row.insertCell(1).textContent = data.driverName;
-                    row.insertCell(2).textContent = reportDate;
-                    row.insertCell(3).textContent = 'Multiple'; // Since it could be multiple shifts
-                    row.insertCell(4).textContent = 'Multiple'; // Multiple materials
-                    row.insertCell(5).textContent = data.totalTonnage.toFixed(2);
-                    row.insertCell(6).textContent = data.trips;
-                    row.insertCell(7).textContent = data.transportRate.toFixed(2);
-                    row.insertCell(8).textContent = data.transportAmount.toFixed(2);
+                    row.insertCell(1).textContent = data.trips;
+                    row.insertCell(2).textContent = data.totalTonnage.toFixed(2);
+                    row.insertCell(3).textContent = data.transportAmount.toFixed(2);
+                    
+                    // Create transaction details cell
+                    const detailsCell = row.insertCell(4);
+                    
+                    let detailsHTML = '<div class="transaction-details">';
+                    detailsHTML += '<strong>Transaction Details:</strong>';
+                    
+                    data.transactions.forEach(transaction => {
+                        detailsHTML += `
+                            <div class="transaction-row">
+                                <div>Date: ${transaction.date} (${transaction.shift})</div>
+                                <div>Material: ${transaction.material}</div>
+                                <div>Net WT: ${transaction.netWt.toFixed(2)} MT</div>
+                                <div>Rate: ₹${transaction.transportRate.toFixed(2)}</div>
+                                <div>Amount: ₹${transaction.transportAmount.toFixed(2)}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    detailsHTML += '</div>';
+                    detailsCell.innerHTML = detailsHTML;
                     
                     totalTransportAmount += data.transportAmount;
                     totalTonnage += data.totalTonnage;
@@ -961,14 +1008,61 @@
                 const totalRow = tableBody.insertRow();
                 totalRow.classList.add('table-active');
                 totalRow.insertCell(0).textContent = 'TOTAL';
-                totalRow.insertCell(1).textContent = '';
-                totalRow.insertCell(2).textContent = '';
-                totalRow.insertCell(3).textContent = '';
+                totalRow.insertCell(1).textContent = totalTrips;
+                totalRow.insertCell(2).textContent = totalTonnage.toFixed(2);
+                totalRow.insertCell(3).textContent = totalTransportAmount.toFixed(2);
                 totalRow.insertCell(4).textContent = '';
-                totalRow.insertCell(5).textContent = totalTonnage.toFixed(2);
-                totalRow.insertCell(6).textContent = totalTrips;
-                totalRow.insertCell(7).textContent = '';
-                totalRow.insertCell(8).textContent = totalTransportAmount.toFixed(2);
+            }
+            
+            function exportToExcel() {
+                if (allRecords.length === 0) {
+                    alert("No records to export.");
+                    return;
+                }
+                
+                // Prepare data for export
+                const data = allRecords.map(record => ({
+                    "S.NO": record.id,
+                    "Accounting Date": record.accountingDate,
+                    "Date": record.date,
+                    "Weighment Slip No": record.weighmentSlipNo,
+                    "DC No": record.deliveryChallanNo,
+                    "Royalty Permit No": record.royaltyPermitNo,
+                    "Permit Qty (CM)": record.permitQty,
+                    "Customer Sr No": record.customerSrNo,
+                    "Customer Name": record.customerName,
+                    "Client Details": record.clientDetails,
+                    "Payment Terms": record.paymentMode,
+                    "Vehicle No": record.vehicleNo,
+                    "Material": record.materialType,
+                    "Gross WT": record.grossWt,
+                    "Tare WT": record.tareWt,
+                    "NET WT": record.netWt,
+                    "Rate Per Tone": record.ratePerTone,
+                    "Amount": record.saleAmount,
+                    "Cash Received": record.cashReceived,
+                    "Advance Received": record.advanceReceived,
+                    "Customer Balance": record.customerBalance,
+                    "Remarks": record.remarks,
+                    "Royalty Rate": record.royaltyRate,
+                    "Royalty Amount": record.royaltyAmount,
+                    "Transport Rate": record.transportRate,
+                    "Transport Amount": record.transportAmount,
+                    "Total Amount": record.totalAmount
+                }));
+                
+                // Create worksheet
+                const ws = XLSX.utils.json_to_sheet(data);
+                
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Weighment Records");
+                
+                // Generate file name with current date
+                const fileName = `Weighment_Data_${new Date().toISOString().split('T')[0]}.xlsx`;
+                
+                // Export to Excel
+                XLSX.writeFile(wb, fileName);
             }
             
             function formatDate(dateString) {
