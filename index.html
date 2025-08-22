@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,9 +83,19 @@
         .number-cell {
             text-align: right;
         }
+        .tipper-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
         @media (max-width: 768px) {
             .btn-container {
                 flex-direction: column;
+            }
+            .tipper-dropdown {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
@@ -97,7 +106,6 @@
         
         <form id="weighmentForm">
             <!-- Basic Information Section -->
-            <div class="section-header">Basic Information</div>
             <div class="row mb-4">
                 <div class="col-md-3">
                     <label for="accountingDate" class="form-label">Accounting Date</label>
@@ -110,9 +118,8 @@
                 <div class="col-md-2">
                     <label for="shift" class="form-label">Shift</label>
                     <select class="form-select" id="shift">
-                        <option value="A-SHIFT">A-SHIFT</option>
-                        <option value="B-SHIFT">B-SHIFT</option>
-                        <option value="C-SHIFT">C-SHIFT</option>
+                        <option value="DAY SHIFT">DAY SHIFT</option>
+                        <option value="NIGHT SHIFT">NIGHT SHIFT</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -120,20 +127,19 @@
                     <input type="text" class="form-control" id="weighmentSlipNo">
                 </div>
                 <div class="col-md-3">
-                    <label for="deliveryChallanNo" class="form-label">Delivery Challan No</label>
+                    <label for="deliveryChallanNo" class="form-label">DC No</label>
                     <input type="text" class="form-control" id="deliveryChallanNo">
                 </div>
             </div>
 
             <!-- Royalty Information Section -->
-            <div class="section-header">Royalty Information</div>
             <div class="row mb-4">
                 <div class="col-md-4">
                     <label for="royaltyPermitNo" class="form-label">Royalty Permit No</label>
                     <input type="text" class="form-control" id="royaltyPermitNo">
                 </div>
                 <div class="col-md-4">
-                    <label for="permitQty" class="form-label">Permit Qty (MT)</label>
+                    <label for="permitQty" class="form-label">Permit Qty (CM)</label>
                     <input type="number" class="form-control" id="permitQty" step="0.01">
                 </div>
                 <div class="col-md-4">
@@ -143,14 +149,13 @@
             </div>
 
             <!-- Customer Information Section -->
-            <div class="section-header">Customer Information</div>
             <div class="row mb-4">
                 <div class="col-md-3">
                     <label for="customerSrNo" class="form-label">Customer Sr.No.</label>
                     <input type="text" class="form-control" id="customerSrNo">
                 </div>
                 <div class="col-md-5">
-                    <label for="customerName" class="form-label">Customer Name</label>
+                    <label for="customerName" class="form-label">Name of the Customer</label>
                     <input type="text" class="form-control" id="customerName">
                 </div>
                 <div class="col-md-4">
@@ -159,11 +164,77 @@
                 </div>
             </div>
 
-            <!-- Material Information -->
-            <div class="section-header">Material Information</div>
+            <!-- Payment Information -->
             <div class="row mb-4">
-                <div class="col-md-3">
-                    <label for="materialType" class="form-label">Material Type</label>
+                <div class="col-md-4">
+                    <label for="paymentMode" class="form-label">Payment Terms</label>
+                    <select class="form-select" id="paymentMode">
+                        <option value="">Select Payment Mode</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Credit">Credit</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="advanceReceived" class="form-label">Advance Received</label>
+                    <input type="number" class="form-control" id="advanceReceived" step="0.01">
+                </div>
+            </div>
+
+            <!-- Vehicle Information -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label for="vehicleNo" class="form-label">Vehicle No</label>
+                    <div class="tipper-dropdown">
+                        <select class="form-select" id="vehicleDropdown">
+                            <option value="">Select Vehicle</option>
+                            <option value="AP39UJ1166">AP39UJ1166</option>
+                            <option value="AP39UJ2399">AP39UJ2399</option>
+                            <option value="AP39UZ3659">AP39UZ3659</option>
+                            <option value="AP39VF1899">AP39VF1899</option>
+                            <option value="AP39UJ5678">AP39UJ5678</option>
+                            <option value="AP39VF2339">AP39VF2339</option>
+                            <option value="AP39W3579">AP39W3579</option>
+                            <option value="AP39WC2389">AP39WC2389</option>
+                            <option value="AP39TV2537">AP39TV2537</option>
+                            <option value="AP39VE2979">AP39VE2979</option>
+                            <option value="AP39WD5679">AP39WD5679</option>
+                            <option value="AP31TN2579">AP31TN2579</option>
+                            <option value="AP39UJ2489">AP39UJ2489</option>
+                            <option value="AP39TV2536">AP39TV2536</option>
+                            <option value="AP39WD8349">AP39WD8349</option>
+                            <option value="AP39UY3345">AP39UY3345</option>
+                            <option value="AP39UY3435">AP39UY3435</option>
+                            <option value="AP39VC5289">AP39VC5289</option>
+                            <option value="AP39WD4199">AP39WD4199</option>
+                            <option value="AP39WC7449">AP39WC7449</option>
+                            <option value="AP39UZ3335">AP39UZ3335</option>
+                            <option value="AP39UH2489">AP39UH2489</option>
+                            <option value="AP31TN4302">AP31TN4302</option>
+                            <option value="AP39VB8829">AP39VB8829</option>
+                            <option value="AP39UU5665">AP39UU5665</option>
+                            <option value="AP39VB2427">AP39VB2427</option>
+                            <option value="AP39UD1589">AP39UD1589</option>
+                            <option value="AP39UF3245">AP39UF3245</option>
+                            <option value="AP39UG0559">AP39UG0559</option>
+                        </select>
+                        <button type="button" class="btn btn-sm btn-primary" id="btnAddVehicle">Add New</button>
+                    </div>
+                    <input type="text" class="form-control mt-2" id="vehicleNo" placeholder="Or enter vehicle number">
+                </div>
+                <div class="col-md-4">
+                    <label for="driverName" class="form-label">Driver Name</label>
+                    <input type="text" class="form-control" id="driverName">
+                </div>
+                <div class="col-md-4">
+                    <label for="transportRate" class="form-label">Transport Rate</label>
+                    <input type="number" class="form-control" id="transportRate" step="0.01">
+                </div>
+            </div>
+
+            <!-- Material Information -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label for="materialType" class="form-label">Material</label>
                     <select class="form-select" id="materialType">
                         <option value="">Select Material</option>
                         <option value="10 MM">10 MM</option>
@@ -176,45 +247,9 @@
                         <option value="R/Sand">R/Sand</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label for="unit" class="form-label">Unit</label>
-                    <select class="form-select" id="unit">
-                        <option value="MT">MT</option>
-                        <option value="Nos.">Nos.</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Payment and Vehicle Information -->
-            <div class="section-header">Payment and Vehicle Information</div>
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <label for="paymentMode" class="form-label">Payment Mode</label>
-                    <select class="form-select" id="paymentMode">
-                        <option value="">Select Payment Mode</option>
-                        <option value="Cash">Cash</option>
-                        <option value="Card">Card</option>
-                        <option value="UPI">UPI</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Credit">Credit</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="vehicleNo" class="form-label">Vehicle No</label>
-                    <input type="text" class="form-control" id="vehicleNo">
-                </div>
-                <div class="col-md-3">
-                    <label for="transportRate" class="form-label">Transport Rate</label>
-                    <input type="number" class="form-control" id="transportRate" step="0.01">
-                </div>
-                <div class="col-md-3">
-                    <label for="driverName" class="form-label">Driver Name</label>
-                    <input type="text" class="form-control" id="driverName">
-                </div>
             </div>
 
             <!-- Weighment Details Section -->
-            <div class="section-header">Weighment Details</div>
             <div class="row mb-4">
                 <div class="col-md-3">
                     <label for="grossWt" class="form-label">Gross WT</label>
@@ -235,10 +270,9 @@
             </div>
 
             <!-- Financial Information Section -->
-            <div class="section-header">Financial Information</div>
             <div class="row mb-4">
                 <div class="col-md-3">
-                    <label for="saleAmount" class="form-label">Sale Amount (Calculated)</label>
+                    <label for="saleAmount" class="form-label">Amount (Calculated)</label>
                     <input type="number" class="form-control calculated" id="saleAmount" readonly>
                 </div>
                 <div class="col-md-3">
@@ -256,7 +290,6 @@
             </div>
 
             <!-- Additional Information -->
-            <div class="section-header">Additional Information</div>
             <div class="row mb-4">
                 <div class="col-md-4">
                     <label for="transportAmount" class="form-label">Transport Amount (Calculated)</label>
@@ -276,8 +309,8 @@
             <div class="btn-container">
                 <button type="submit" class="btn btn-success">Save Entry</button>
                 <button type="reset" class="btn btn-secondary">Clear Form</button>
-                <button type="button" class="btn btn-info" id="btnCalculate">Calculate Values</button>
-                <button type="button" class="btn btn-warning" id="btnGenerateReports">Generate Reports</button>
+                <button type="button" class="btn btn-info" id="btnCalculate">Calculate</button>
+                <button type="button" class="btn btn-warning" id="btnGenerateReports">Reports</button>
             </div>
         </form>
     </div>
@@ -291,19 +324,36 @@
                         <th>S.NO</th>
                         <th>Accounting Date</th>
                         <th>Date</th>
-                        <th>Shift</th>
                         <th>Weighment Slip No</th>
+                        <th>DC No</th>
+                        <th>Royalty Permit No</th>
+                        <th>Permit Qty (CM)</th>
+                        <th>Customer Sr No</th>
                         <th>Customer Name</th>
+                        <th>Client Details</th>
+                        <th>Payment Terms</th>
                         <th>Vehicle No</th>
-                        <th>Material Type</th>
+                        <th>Material</th>
+                        <th>Gross WT</th>
+                        <th>Tare WT</th>
                         <th>NET WT</th>
-                        <th>Sale Amount</th>
+                        <th>Rate Per Tone</th>
+                        <th>Amount</th>
+                        <th>Cash Received</th>
+                        <th>Advance Received</th>
+                        <th>Customer Balance</th>
+                        <th>Remarks</th>
+                        <th>Royalty Rate</th>
+                        <th>Royalty Amount</th>
+                        <th>Transport Rate</th>
+                        <th>Transport Amount</th>
+                        <th>Total Amount</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="recordsTable">
                     <tr>
-                        <td colspan="11" class="text-center">No records found</td>
+                        <td colspan="28" class="text-center">No records found</td>
                     </tr>
                 </tbody>
             </table>
@@ -324,10 +374,9 @@
             <div class="col-md-3">
                 <label for="dispatchReportShift" class="form-label">Select Shift</label>
                 <select class="form-select" id="dispatchReportShift">
-                    <option value="A-SHIFT">A-SHIFT</option>
-                    <option value="B-SHIFT">B-SHIFT</option>
-                    <option value="C-SHIFT">C-SHIFT</option>
-                    <option value="ALL">ALL SHIFTS</option>
+                    <option value="DAY SHIFT">DAY SHIFT</option>
+                    <option value="NIGHT SHIFT">NIGHT SHIFT</option>
+                    <option value="ALL">FULL DAY</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -365,25 +414,66 @@
                         <th>Shift</th>
                         <th>Material</th>
                         <th>NET WT (MT)</th>
+                        <th>Trips</th>
                         <th>Transport Rate</th>
                         <th>Transport Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="8" class="text-center">No report generated yet</td>
+                        <td colspan="9" class="text-center">No report generated yet</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
+    <!-- Add Vehicle Modal -->
+    <div class="modal fade" id="addVehicleModal" tabindex="-1" aria-labelledby="addVehicleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addVehicleModalLabel">Add New Vehicle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newVehicleNo" class="form-label">Vehicle Number</label>
+                        <input type="text" class="form-control" id="newVehicleNo">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveVehicle">Save Vehicle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Store all records in an array for reporting
         let allRecords = [];
         let recordIdCounter = 1;
+        let vehicleNumbers = [
+            "AP39UJ1166", "AP39UJ2399", "AP39UZ3659", "AP39VF1899", "AP39UJ5678", 
+            "AP39VF2339", "AP39W3579", "AP39WC2389", "AP39TV2537", "AP39VE2979", 
+            "AP39WD5679", "AP31TN2579", "AP39UJ2489", "AP39TV2536", "AP39WD8349", 
+            "AP39UY3345", "AP39UY3435", "AP39VC5289", "AP39WD4199", "AP39WC7449", 
+            "AP39UZ3335", "AP39UH2489", "AP31TN4302", "AP39VB8829", "AP39UU5665", 
+            "AP39VB2427", "AP39UD1589", "AP39UF3245", "AP39UG0559"
+        ];
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize vehicle dropdown
+            const vehicleDropdown = document.getElementById('vehicleDropdown');
+            vehicleNumbers.forEach(vehicle => {
+                const option = document.createElement('option');
+                option.value = vehicle;
+                option.textContent = vehicle;
+                vehicleDropdown.appendChild(option);
+            });
+            
             // Set default dates to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('accountingDate').value = today;
@@ -391,21 +481,56 @@
             document.getElementById('dispatchReportDate').value = today;
             document.getElementById('transportBillDate').value = today;
             
-            // Calculate net weight when gross or tare weight changes
+            // Event listeners for calculations
             document.getElementById('grossWt').addEventListener('input', calculateValues);
             document.getElementById('tareWt').addEventListener('input', calculateValues);
-            
-            // Calculate sale amount when net weight or rate changes
             document.getElementById('ratePerTone').addEventListener('input', calculateValues);
-            
-            // Calculate royalty amount when royalty rate or net weight changes
             document.getElementById('royaltyRate').addEventListener('input', calculateValues);
-            
-            // Calculate transport amount when transport rate or net weight changes
             document.getElementById('transportRate').addEventListener('input', calculateValues);
-            
-            // Calculate customer balance when cash received changes
             document.getElementById('cashReceived').addEventListener('input', calculateValues);
+            document.getElementById('advanceReceived').addEventListener('input', calculateValues);
+            
+            // Vehicle dropdown change event
+            document.getElementById('vehicleDropdown').addEventListener('change', function() {
+                if (this.value) {
+                    document.getElementById('vehicleNo').value = this.value;
+                }
+            });
+            
+            // Add new vehicle button
+            document.getElementById('btnAddVehicle').addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('addVehicleModal'));
+                modal.show();
+            });
+            
+            // Save new vehicle
+            document.getElementById('btnSaveVehicle').addEventListener('click', function() {
+                const newVehicleNo = document.getElementById('newVehicleNo').value.trim().toUpperCase();
+                if (newVehicleNo && !vehicleNumbers.includes(newVehicleNo)) {
+                    vehicleNumbers.push(newVehicleNo);
+                    
+                    // Add to dropdown
+                    const option = document.createElement('option');
+                    option.value = newVehicleNo;
+                    option.textContent = newVehicleNo;
+                    document.getElementById('vehicleDropdown').appendChild(option);
+                    
+                    // Set as selected
+                    document.getElementById('vehicleDropdown').value = newVehicleNo;
+                    document.getElementById('vehicleNo').value = newVehicleNo;
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addVehicleModal'));
+                    modal.hide();
+                    
+                    // Clear input
+                    document.getElementById('newVehicleNo').value = '';
+                } else if (vehicleNumbers.includes(newVehicleNo)) {
+                    alert("This vehicle number already exists in the list.");
+                } else {
+                    alert("Please enter a valid vehicle number.");
+                }
+            });
             
             // Manual calculation button
             document.getElementById('btnCalculate').addEventListener('click', calculateAllValues);
@@ -448,7 +573,8 @@
                 
                 // Calculate Customer Balance
                 const cashReceived = parseFloat(document.getElementById('cashReceived').value) || 0;
-                const customerBalance = totalAmount - cashReceived;
+                const advanceReceived = parseFloat(document.getElementById('advanceReceived').value) || 0;
+                const customerBalance = totalAmount - cashReceived - advanceReceived;
                 document.getElementById('customerBalance').value = customerBalance.toFixed(2);
             }
             
@@ -478,7 +604,6 @@
                     vehicleNo: document.getElementById('vehicleNo').value,
                     driverName: document.getElementById('driverName').value,
                     materialType: document.getElementById('materialType').value,
-                    unit: document.getElementById('unit').value,
                     transportRate: parseFloat(document.getElementById('transportRate').value) || 0,
                     grossWt: parseFloat(document.getElementById('grossWt').value) || 0,
                     tareWt: parseFloat(document.getElementById('tareWt').value) || 0,
@@ -486,6 +611,7 @@
                     ratePerTone: parseFloat(document.getElementById('ratePerTone').value) || 0,
                     saleAmount: parseFloat(document.getElementById('saleAmount').value) || 0,
                     cashReceived: parseFloat(document.getElementById('cashReceived').value) || 0,
+                    advanceReceived: parseFloat(document.getElementById('advanceReceived').value) || 0,
                     customerBalance: parseFloat(document.getElementById('customerBalance').value) || 0,
                     royaltyAmount: parseFloat(document.getElementById('royaltyAmount').value) || 0,
                     transportAmount: parseFloat(document.getElementById('transportAmount').value) || 0,
@@ -496,50 +622,8 @@
                 // Add to records array
                 allRecords.push(record);
                 
-                // Get the table body
-                const tableBody = document.getElementById('recordsTable');
-                
-                // Check if the table has the "no records" row and remove it
-                if (tableBody.rows.length === 1 && tableBody.rows[0].cells[0].colSpan > 1) {
-                    tableBody.deleteRow(0);
-                }
-                
-                // Create a new row
-                const newRow = tableBody.insertRow();
-                
-                // Add cells with data
-                newRow.insertCell(0).textContent = tableBody.rows.length;
-                newRow.insertCell(1).textContent = record.accountingDate;
-                newRow.insertCell(2).textContent = record.date;
-                newRow.insertCell(3).textContent = record.shift;
-                newRow.insertCell(4).textContent = record.weighmentSlipNo;
-                newRow.insertCell(5).textContent = record.customerName;
-                newRow.insertCell(6).textContent = record.vehicleNo;
-                newRow.insertCell(7).textContent = record.materialType;
-                newRow.insertCell(8).textContent = record.netWt.toFixed(2);
-                newRow.insertCell(9).textContent = record.saleAmount.toFixed(2);
-                
-                // Add actions cell
-                const actionsCell = newRow.insertCell(10);
-                actionsCell.innerHTML = '<button class="btn btn-sm btn-info">View</button> <button class="btn btn-sm btn-danger">Delete</button>';
-                
-                // Add event listener to delete button
-                actionsCell.querySelector('.btn-danger').addEventListener('click', function() {
-                    // Remove from records array
-                    allRecords = allRecords.filter(r => r.id !== record.id);
-                    
-                    // Remove from table
-                    tableBody.deleteRow(newRow.rowIndex - 1);
-                    
-                    // If no records left, add the "no records" row
-                    if (tableBody.rows.length === 0) {
-                        const noRecordsRow = tableBody.insertRow();
-                        const cell = noRecordsRow.insertCell(0);
-                        cell.textContent = 'No records found';
-                        cell.colSpan = 11;
-                        cell.className = 'text-center';
-                    }
-                });
+                // Update the records table
+                updateRecordsTable();
                 
                 // Reset the form
                 document.getElementById('weighmentForm').reset();
@@ -549,6 +633,70 @@
                 document.getElementById('date').value = today;
                 
                 alert("Record added successfully!");
+            }
+            
+            function updateRecordsTable() {
+                // Get the table body
+                const tableBody = document.getElementById('recordsTable');
+                
+                // Clear the table
+                tableBody.innerHTML = '';
+                
+                if (allRecords.length === 0) {
+                    const row = tableBody.insertRow();
+                    const cell = row.insertCell(0);
+                    cell.textContent = 'No records found';
+                    cell.colSpan = 28;
+                    cell.className = 'text-center';
+                    return;
+                }
+                
+                // Add each record to the table
+                allRecords.forEach((record, index) => {
+                    const row = tableBody.insertRow();
+                    
+                    // Add cells with data
+                    row.insertCell(0).textContent = index + 1;
+                    row.insertCell(1).textContent = record.accountingDate;
+                    row.insertCell(2).textContent = record.date;
+                    row.insertCell(3).textContent = record.weighmentSlipNo;
+                    row.insertCell(4).textContent = record.deliveryChallanNo;
+                    row.insertCell(5).textContent = record.royaltyPermitNo;
+                    row.insertCell(6).textContent = record.permitQty.toFixed(2);
+                    row.insertCell(7).textContent = record.customerSrNo;
+                    row.insertCell(8).textContent = record.customerName;
+                    row.insertCell(9).textContent = record.clientDetails;
+                    row.insertCell(10).textContent = record.paymentMode;
+                    row.insertCell(11).textContent = record.vehicleNo;
+                    row.insertCell(12).textContent = record.materialType;
+                    row.insertCell(13).textContent = record.grossWt.toFixed(2);
+                    row.insertCell(14).textContent = record.tareWt.toFixed(2);
+                    row.insertCell(15).textContent = record.netWt.toFixed(2);
+                    row.insertCell(16).textContent = record.ratePerTone.toFixed(2);
+                    row.insertCell(17).textContent = record.saleAmount.toFixed(2);
+                    row.insertCell(18).textContent = record.cashReceived.toFixed(2);
+                    row.insertCell(19).textContent = record.advanceReceived.toFixed(2);
+                    row.insertCell(20).textContent = record.customerBalance.toFixed(2);
+                    row.insertCell(21).textContent = record.remarks;
+                    row.insertCell(22).textContent = record.royaltyRate.toFixed(2);
+                    row.insertCell(23).textContent = record.royaltyAmount.toFixed(2);
+                    row.insertCell(24).textContent = record.transportRate.toFixed(2);
+                    row.insertCell(25).textContent = record.transportAmount.toFixed(2);
+                    row.insertCell(26).textContent = record.totalAmount.toFixed(2);
+                    
+                    // Add actions cell
+                    const actionsCell = row.insertCell(27);
+                    actionsCell.innerHTML = '<button class="btn btn-sm btn-info">View</button> <button class="btn btn-sm btn-danger">Delete</button>';
+                    
+                    // Add event listener to delete button
+                    actionsCell.querySelector('.btn-danger').addEventListener('click', function() {
+                        // Remove from records array
+                        allRecords = allRecords.filter(r => r.id !== record.id);
+                        
+                        // Update the table
+                        updateRecordsTable();
+                    });
+                });
             }
             
             function generateDispatchReport() {
@@ -582,6 +730,7 @@
                         customerData[record.customerName] = {
                             vehicles: new Set(),
                             totalTonnage: 0,
+                            totalTrips: 0,
                             materials: {}
                         };
                         
@@ -589,7 +738,8 @@
                         materialTypes.forEach(material => {
                             customerData[record.customerName].materials[material] = {
                                 vehicles: 0,
-                                tonnage: 0
+                                tonnage: 0,
+                                trips: 0
                             };
                         });
                     }
@@ -597,13 +747,15 @@
                     // Add vehicle to set (to count unique vehicles)
                     customerData[record.customerName].vehicles.add(record.vehicleNo);
                     
-                    // Add to total tonnage
+                    // Add to total tonnage and trips
                     customerData[record.customerName].totalTonnage += record.netWt;
+                    customerData[record.customerName].totalTrips += 1;
                     
                     // Add to specific material
                     if (customerData[record.customerName].materials[record.materialType]) {
                         customerData[record.customerName].materials[record.materialType].vehicles += 1;
                         customerData[record.customerName].materials[record.materialType].tonnage += record.netWt;
+                        customerData[record.customerName].materials[record.materialType].trips += 1;
                     }
                 });
                 
@@ -613,9 +765,9 @@
                 // Add title row
                 const formattedDate = formatDate(reportDate);
                 if (reportShift === "ALL") {
-                    reportHTML += `<tr class="shift-header"><th colspan="12">ALL SHIFTS - Dispatch Vehicle Wise Planning - ${formattedDate}</th></tr>`;
+                    reportHTML += `<tr class="shift-header"><th colspan="13">FULL DAY - Dispatch Vehicle Wise Planning - ${formattedDate}</th></tr>`;
                 } else {
-                    reportHTML += `<tr class="shift-header"><th colspan="12">${reportShift} - Dispatch Vehicle Wise Planning - ${formattedDate}</th></tr>`;
+                    reportHTML += `<tr class="shift-header"><th colspan="13">${reportShift} - Dispatch Vehicle Wise Planning - ${formattedDate}</th></tr>`;
                 }
                 
                 // Add header row
@@ -631,14 +783,15 @@
                 // Add customer rows
                 let grandTotalVehicles = 0;
                 let grandTotalTonnage = 0;
+                let grandTotalTrips = 0;
                 const materialTotals = {};
                 materialTypes.forEach(material => {
-                    materialTotals[material] = { vehicles: 0, tonnage: 0 };
+                    materialTotals[material] = { vehicles: 0, tonnage: 0, trips: 0 };
                 });
                 
                 for (const customer in customerData) {
                     // Customer name row
-                    reportHTML += `<tr><td rowspan="2">${customer}</td><td>No. of Vehicles</td>`;
+                    reportHTML += `<tr><td rowspan="3">${customer}</td><td>No. of Vehicles</td>`;
                     
                     // Vehicle counts by material
                     materialTypes.forEach(material => {
@@ -669,6 +822,22 @@
                     grandTotalTonnage += customerData[customer].totalTonnage;
                     
                     reportHTML += '</tr>';
+                    
+                    // Trips row
+                    reportHTML += `<tr><td>Total Trips</td>`;
+                    
+                    // Trips by material
+                    materialTypes.forEach(material => {
+                        const trips = customerData[customer].materials[material].trips;
+                        reportHTML += `<td class="number-cell">${trips > 0 ? trips : ''}</td>`;
+                        materialTotals[material].trips += trips;
+                    });
+                    
+                    // Total trips for this customer
+                    reportHTML += `<td class="number-cell">${customerData[customer].totalTrips}</td>`;
+                    grandTotalTrips += customerData[customer].totalTrips;
+                    
+                    reportHTML += '</tr>';
                 }
                 
                 // Add totals row
@@ -695,6 +864,19 @@
                 
                 // Grand total tonnage
                 reportHTML += `<td class="number-cell">${grandTotalTonnage.toFixed(2)}</td>`;
+                reportHTML += '</tr>';
+                
+                // Trips totals row
+                reportHTML += '<tr class="total-header">';
+                reportHTML += '<td colspan="2"></td>';
+                
+                // Trips totals by material
+                materialTypes.forEach(material => {
+                    reportHTML += `<td class="number-cell">${materialTotals[material].trips > 0 ? materialTotals[material].trips : ''}</td>`;
+                });
+                
+                // Grand total trips
+                reportHTML += `<td class="number-cell">${grandTotalTrips}</td>`;
                 reportHTML += '</tr>';
                 
                 reportHTML += '</table>';
@@ -727,25 +909,53 @@
                     return;
                 }
                 
+                // Group records by vehicle
+                const vehicleData = {};
+                
+                dateRecords.forEach(record => {
+                    if (!vehicleData[record.vehicleNo]) {
+                        vehicleData[record.vehicleNo] = {
+                            driverName: record.driverName || '-',
+                            trips: 0,
+                            totalTonnage: 0,
+                            transportRate: record.transportRate,
+                            transportAmount: 0,
+                            records: []
+                        };
+                    }
+                    
+                    vehicleData[record.vehicleNo].trips += 1;
+                    vehicleData[record.vehicleNo].totalTonnage += record.netWt;
+                    vehicleData[record.vehicleNo].transportAmount += record.transportAmount;
+                    vehicleData[record.vehicleNo].records.push(record);
+                });
+                
                 // Update the report table
                 const tableBody = document.querySelector('#transportBillTable tbody');
                 tableBody.innerHTML = '';
                 
                 let totalTransportAmount = 0;
+                let totalTonnage = 0;
+                let totalTrips = 0;
                 
-                dateRecords.forEach(record => {
-                    const row = tableBody.insertRow();
-                    row.insertCell(0).textContent = record.vehicleNo;
-                    row.insertCell(1).textContent = record.driverName || '-';
-                    row.insertCell(2).textContent = record.date;
-                    row.insertCell(3).textContent = record.shift;
-                    row.insertCell(4).textContent = record.materialType;
-                    row.insertCell(5).textContent = record.netWt.toFixed(2);
-                    row.insertCell(6).textContent = record.transportRate.toFixed(2);
-                    row.insertCell(7).textContent = record.transportAmount.toFixed(2);
+                for (const vehicle in vehicleData) {
+                    const data = vehicleData[vehicle];
                     
-                    totalTransportAmount += record.transportAmount;
-                });
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = vehicle;
+                    row.insertCell(1).textContent = data.driverName;
+                    row.insertCell(2).textContent = reportDate;
+                    row.insertCell(3).textContent = 'Multiple'; // Since it could be multiple shifts
+                    row.insertCell(4).textContent = 'Multiple'; // Multiple materials
+                    row.insertCell(5).textContent = data.totalTonnage.toFixed(2);
+                    row.insertCell(6).textContent = data.trips;
+                    row.insertCell(7).textContent = data.transportRate.toFixed(2);
+                    row.insertCell(8).textContent = data.transportAmount.toFixed(2);
+                    
+                    totalTransportAmount += data.transportAmount;
+                    totalTonnage += data.totalTonnage;
+                    totalTrips += data.trips;
+                }
                 
                 // Add total row
                 const totalRow = tableBody.insertRow();
@@ -755,9 +965,10 @@
                 totalRow.insertCell(2).textContent = '';
                 totalRow.insertCell(3).textContent = '';
                 totalRow.insertCell(4).textContent = '';
-                totalRow.insertCell(5).textContent = '';
-                totalRow.insertCell(6).textContent = '';
-                totalRow.insertCell(7).textContent = totalTransportAmount.toFixed(2);
+                totalRow.insertCell(5).textContent = totalTonnage.toFixed(2);
+                totalRow.insertCell(6).textContent = totalTrips;
+                totalRow.insertCell(7).textContent = '';
+                totalRow.insertCell(8).textContent = totalTransportAmount.toFixed(2);
             }
             
             function formatDate(dateString) {
@@ -767,6 +978,9 @@
                 const year = date.getFullYear();
                 return `${day}-${month}-${year}`;
             }
+            
+            // Initialize the records table
+            updateRecordsTable();
         });
     </script>
 </body>
