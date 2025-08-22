@@ -7,6 +7,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Add SheetJS library for Excel export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Add jsPDF library for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -112,6 +115,10 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
+        }
+        .report-actions {
+            margin-top: 15px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -396,6 +403,9 @@
                 <button type="button" class="btn btn-primary form-control" id="btnDispatchReport">Generate Dispatch Report</button>
             </div>
         </div>
+        <div class="report-actions" id="dispatchReportActions" style="display: none;">
+            <button type="button" class="btn btn-success" id="btnDownloadDispatchPDF">Download PDF Report</button>
+        </div>
         <div class="table-responsive">
             <div id="dispatchReportContainer"></div>
         </div>
@@ -419,6 +429,9 @@
                 <label class="form-label">&nbsp;</label>
                 <button type="button" class="btn btn-primary form-control" id="btnTransportBill">Generate Transport Bill</button>
             </div>
+        </div>
+        <div class="report-actions" id="transportReportActions" style="display: none;">
+            <button type="button" class="btn btn-success" id="btnDownloadTransportPDF">Download PDF Report</button>
         </div>
         <div class="table-responsive">
             <table class="table table-bordered report-table" id="transportBillTable">
@@ -464,6 +477,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Initialize jsPDF
+        window.jsPDF = window.jspdf.jsPDF;
+
         // Store all records in an array for reporting
         let allRecords = [];
         let recordIdCounter = 1;
@@ -475,6 +491,10 @@
             "AP39UZ3335", "AP39UH2489", "AP31TN4302", "AP39VB8829", "AP39UU5665", 
             "AP39VB2427", "AP39UD1589", "AP39UF3245", "AP39UG0559"
         ];
+
+        // Store report data for PDF export
+        let currentDispatchReportData = null;
+        let currentTransportReportData = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize vehicle dropdown
@@ -551,6 +571,10 @@
             // Report generation buttons
             document.getElementById('btnDispatchReport').addEventListener('click', generateDispatchReport);
             document.getElementById('btnTransportBill').addEventListener('click', generateTransportBill);
+            
+            // PDF download buttons
+            document.getElementById('btnDownloadDispatchPDF').addEventListener('click', downloadDispatchPDF);
+            document.getElementById('btnDownloadTransportPDF').addEventListener('click', downloadTransportPDF);
             
             // Form submission
             document.getElementById('weighmentForm').addEventListener('submit', function(e) {
@@ -733,6 +757,7 @@
                 
                 if (dateRecords.length === 0) {
                     alert("No records found for the selected criteria.");
+                    document.getElementById('dispatchReportActions').style.display = 'none';
                     return;
                 }
                 
@@ -773,6 +798,17 @@
                         customerData[record.customerName].materials[record.materialType].trips += 1;
                     }
                 });
+                
+                // Store data for PDF export
+                currentDispatchReportData = {
+                    date: reportDate,
+                    shift: reportShift,
+                    customerData: customerData,
+                    materialTypes: materialTypes
+                };
+                
+                // Show download button
+                document.getElementById('dispatchReportActions').style.display = 'block';
                 
                 // Create report table
                 let reportHTML = '<table class="table table-bordered">';
@@ -927,6 +963,7 @@
                 
                 if (dateRecords.length === 0) {
                     alert("No records found for the selected criteria.");
+                    document.getElementById('transportReportActions').style.display = 'none';
                     return;
                 }
                 
@@ -949,6 +986,7 @@
                     vehicleData[record.vehicleNo].transactions.push({
                         date: record.date,
                         shift: record.shift,
+                        customerName: record.customerName, // Added client name
                         material: record.materialType,
                         netWt: record.netWt,
                         transportRate: record.transportRate,
@@ -960,6 +998,17 @@
                 for (const vehicle in vehicleData) {
                     vehicleData[vehicle].transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
                 }
+                
+                // Store data for PDF export
+                currentTransportReportData = {
+                    startDate: startDate,
+                    endDate: endDate,
+                    vehicleNo: vehicleNo,
+                    vehicleData: vehicleData
+                };
+                
+                // Show download button
+                document.getElementById('transportReportActions').style.display = 'block';
                 
                 // Update the report table
                 const tableBody = document.querySelector('#transportBillTable tbody');
@@ -988,6 +1037,7 @@
                         detailsHTML += `
                             <div class="transaction-row">
                                 <div>Date: ${transaction.date} (${transaction.shift})</div>
+                                <div>Client: ${transaction.customerName}</div>
                                 <div>Material: ${transaction.material}</div>
                                 <div>Net WT: ${transaction.netWt.toFixed(2)} MT</div>
                                 <div>Rate: ₹${transaction.transportRate.toFixed(2)}</div>
@@ -1012,6 +1062,148 @@
                 totalRow.insertCell(2).textContent = totalTonnage.toFixed(2);
                 totalRow.insertCell(3).textContent = totalTransportAmount.toFixed(2);
                 totalRow.insertCell(4).textContent = '';
+            }
+            
+            function downloadDispatchPDF() {
+                if (!currentDispatchReportData) {
+                    alert("No dispatch report data available to download.");
+                    return;
+                }
+                
+                const { date, shift, customerData, materialTypes } = currentDispatchReportData;
+                
+                // Create new PDF document
+                const doc = new jsPDF();
+                
+                // Add title
+                const formattedDate = formatDate(date);
+                const title = shift === "ALL" 
+                    ? `FULL DAY - Dispatch Vehicle Wise Planning - ${formattedDate}`
+                    : `${shift} - Dispatch Vehicle Wise Planning - ${formattedDate}`;
+                
+                doc.setFontSize(16);
+                doc.text(title, 14, 15);
+                
+                // Prepare table data
+                const tableData = [];
+                const headers = ['Customer Name', 'Unit', ...materialTypes, 'TOTAL'];
+                
+                // Add customer data
+                for (const customer in customerData) {
+                    const data = customerData[customer];
+                    
+                    // Vehicles row
+                    const vehiclesRow = [customer, 'No. of Vehicles'];
+                    materialTypes.forEach(material => {
+                        vehiclesRow.push(data.materials[material].vehicles || '');
+                    });
+                    vehiclesRow.push(data.vehicles.size);
+                    tableData.push(vehiclesRow);
+                    
+                    // Tonnage row
+                    const tonnageRow = ['', 'Total Tonnage (MT)'];
+                    materialTypes.forEach(material => {
+                        tonnageRow.push(data.materials[material].tonnage > 0 ? data.materials[material].tonnage.toFixed(2) : '');
+                    });
+                    tonnageRow.push(data.totalTonnage.toFixed(2));
+                    tableData.push(tonnageRow);
+                    
+                    // Trips row
+                    const tripsRow = ['', 'Total Trips'];
+                    materialTypes.forEach(material => {
+                        tripsRow.push(data.materials[material].trips > 0 ? data.materials[material].trips : '');
+                    });
+                    tripsRow.push(data.totalTrips);
+                    tableData.push(tripsRow);
+                    
+                    // Empty row for spacing
+                    tableData.push(['', '', '', '', '', '', '', '', '', '']);
+                }
+                
+                // Add table to PDF
+                doc.autoTable({
+                    head: [headers],
+                    body: tableData,
+                    startY: 25,
+                    theme: 'grid',
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [100, 100, 100] }
+                });
+                
+                // Save the PDF
+                const fileName = `Dispatch_Report_${date}_${shift.replace(' ', '_')}.pdf`;
+                doc.save(fileName);
+            }
+            
+            function downloadTransportPDF() {
+                if (!currentTransportReportData) {
+                    alert("No transport report data available to download.");
+                    return;
+                }
+                
+                const { startDate, endDate, vehicleNo, vehicleData } = currentTransportReportData;
+                
+                // Create new PDF document
+                const doc = new jsPDF();
+                
+                // Add title
+                const title = `Transport Bill Report - ${formatDate(startDate)} to ${formatDate(endDate)}`;
+                if (vehicleNo) {
+                    doc.setFontSize(16);
+                    doc.text(title, 14, 15);
+                    doc.setFontSize(12);
+                    doc.text(`Vehicle: ${vehicleNo}`, 14, 25);
+                } else {
+                    doc.setFontSize(16);
+                    doc.text(title, 14, 15);
+                }
+                
+                // Prepare table data
+                const tableData = [];
+                
+                for (const vehicle in vehicleData) {
+                    const data = vehicleData[vehicle];
+                    
+                    // Add vehicle header
+                    tableData.push([{content: `Vehicle: ${vehicle}`, colSpan: 5, styles: {fillColor: [200, 200, 200]}}]);
+                    
+                    // Add transaction headers
+                    tableData.push(['Date', 'Client', 'Material', 'Net WT (MT)', 'Amount (₹)']);
+                    
+                    // Add transactions
+                    data.transactions.forEach(transaction => {
+                        tableData.push([
+                            `${transaction.date} (${transaction.shift})`,
+                            transaction.customerName,
+                            transaction.material,
+                            transaction.netWt.toFixed(2),
+                            transaction.transportAmount.toFixed(2)
+                        ]);
+                    });
+                    
+                    // Add vehicle totals
+                    tableData.push([
+                        {content: 'TOTAL', colSpan: 3, styles: {fontStyle: 'bold'}},
+                        data.totalTonnage.toFixed(2),
+                        data.transportAmount.toFixed(2)
+                    ]);
+                    
+                    // Add empty row for spacing
+                    tableData.push(['', '', '', '', '']);
+                }
+                
+                // Add table to PDF
+                doc.autoTable({
+                    body: tableData,
+                    startY: vehicleNo ? 30 : 25,
+                    theme: 'grid',
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [100, 100, 100] }
+                });
+                
+                // Save the PDF
+                const fileName = `Transport_Bill_${startDate}_to_${endDate}${vehicleNo ? '_' + vehicleNo : ''}.pdf`;
+                doc.save(fileName);
             }
             
             function exportToExcel() {
