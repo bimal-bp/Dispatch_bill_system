@@ -31,6 +31,7 @@
         }
         .form-label {
             font-weight: 500;
+            color: #007bff;
         }
         .table-responsive {
             overflow-x: auto;
@@ -125,7 +126,7 @@
 <body>
     <div class="container">
         <h1>Weighbridge_billing_system</h1>
-        
+       
         <form id="weighmentForm">
             <!-- Basic Information Section -->
             <div class="row mb-4">
@@ -140,8 +141,8 @@
                 <div class="col-md-2">
                     <label for="shift" class="form-label">Shift</label>
                     <select class="form-select" id="shift">
-                        <option value="DAY SHIFT">DAY SHIFT</option>
-                        <option value="NIGHT SHIFT">NIGHT SHIFT</option>
+                        <option value="A-SHIFT">A-SHIFT</option>
+                        <option value="B-SHIFT">B-SHIFT</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -153,7 +154,6 @@
                     <input type="text" class="form-control" id="deliveryChallanNo">
                 </div>
             </div>
-
             <!-- Royalty Information Section -->
             <div class="row mb-4">
                 <div class="col-md-4">
@@ -169,7 +169,6 @@
                     <input type="number" class="form-control" id="royaltyRate" step="0.01">
                 </div>
             </div>
-
             <!-- Customer Information Section -->
             <div class="row mb-4">
                 <div class="col-md-3">
@@ -185,7 +184,6 @@
                     <input type="text" class="form-control" id="clientDetails">
                 </div>
             </div>
-
             <!-- Payment Information -->
             <div class="row mb-4">
                 <div class="col-md-4">
@@ -201,7 +199,6 @@
                     <input type="number" class="form-control" id="advanceReceived" step="0.01">
                 </div>
             </div>
-
             <!-- Vehicle Information -->
             <div class="row mb-4">
                 <div class="col-md-4">
@@ -248,7 +245,6 @@
                     <input type="number" class="form-control" id="transportRate" step="0.01">
                 </div>
             </div>
-
             <!-- Material Information -->
             <div class="row mb-4">
                 <div class="col-md-4">
@@ -266,7 +262,6 @@
                     </select>
                 </div>
             </div>
-
             <!-- Weighment Details Section -->
             <div class="row mb-4">
                 <div class="col-md-3">
@@ -286,7 +281,6 @@
                     <input type="number" class="form-control" id="ratePerTone" step="0.01">
                 </div>
             </div>
-
             <!-- Financial Information Section -->
             <div class="row mb-4">
                 <div class="col-md-3">
@@ -306,7 +300,6 @@
                     <input type="number" class="form-control calculated" id="royaltyAmount" readonly>
                 </div>
             </div>
-
             <!-- Additional Information -->
             <div class="row mb-4">
                 <div class="col-md-4">
@@ -322,18 +315,13 @@
                     <input type="text" class="form-control" id="remarks">
                 </div>
             </div>
-
             <!-- Action Buttons -->
             <div class="btn-container">
                 <button type="submit" class="btn btn-success">Save Entry</button>
-                <button type="reset" class="btn btn-secondary">Clear Form</button>
-                <button type="button" class="btn btn-info" id="btnCalculate">Calculate</button>
-                <button type="button" class="btn btn-warning" id="btnGenerateReports">Reports</button>
                 <button type="button" class="btn btn-primary" id="btnExportExcel">Export to Excel</button>
             </div>
         </form>
     </div>
-
     <div class="container">
         <h2>Data Records</h2>
         <div class="table-responsive">
@@ -378,11 +366,10 @@
             </table>
         </div>
     </div>
-
     <!-- Reports Section -->
     <div class="container report-section">
         <h2>Reports</h2>
-        
+       
         <!-- Dispatch Vehicle Wise Planning Report -->
         <div class="section-header">Dispatch Vehicle Wise Planning Report</div>
         <div class="row mb-4">
@@ -393,8 +380,8 @@
             <div class="col-md-3">
                 <label for="dispatchReportShift" class="form-label">Select Shift</label>
                 <select class="form-select" id="dispatchReportShift">
-                    <option value="DAY SHIFT">DAY SHIFT</option>
-                    <option value="NIGHT SHIFT">NIGHT SHIFT</option>
+                    <option value="A-SHIFT">A-SHIFT</option>
+                    <option value="B-SHIFT">B-SHIFT</option>
                     <option value="ALL">FULL DAY</option>
                 </select>
             </div>
@@ -409,7 +396,32 @@
         <div class="table-responsive">
             <div id="dispatchReportContainer"></div>
         </div>
-
+        <!-- FTD (Full Truck Dispatch) Report -->
+        <div class="section-header">FTD (Full Truck Dispatch) Report</div>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label for="ftdReportDate" class="form-label">Select Date for Report</label>
+                <input type="date" class="form-control" id="ftdReportDate">
+            </div>
+            <div class="col-md-3">
+                <label for="ftdReportShift" class="form-label">Select Shift</label>
+                <select class="form-select" id="ftdReportShift">
+                    <option value="A-SHIFT">A-SHIFT</option>
+                    <option value="B-SHIFT">B-SHIFT</option>
+                    <option value="ALL">FULL DAY</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-primary form-control" id="btnFtdReport">Generate FTD Report</button>
+            </div>
+        </div>
+        <div class="report-actions" id="ftdReportActions" style="display: none;">
+            <button type="button" class="btn btn-success" id="btnDownloadFtdPDF">Download PDF Report</button>
+        </div>
+        <div class="table-responsive">
+            <div id="ftdReportContainer"></div>
+        </div>
         <!-- Transport Bill Report -->
         <div class="section-header">Transport Bill Report</div>
         <div class="row mb-4">
@@ -452,7 +464,6 @@
             </table>
         </div>
     </div>
-
     <!-- Add Vehicle Modal -->
     <div class="modal fade" id="addVehicleModal" tabindex="-1" aria-labelledby="addVehicleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -474,28 +485,25 @@
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Initialize jsPDF
         window.jsPDF = window.jspdf.jsPDF;
-
         // Store all records in an array for reporting
         let allRecords = [];
         let recordIdCounter = 1;
         let vehicleNumbers = [
-            "AP39UJ1166", "AP39UJ2399", "AP39UZ3659", "AP39VF1899", "AP39UJ5678", 
-            "AP39VF2339", "AP39W3579", "AP39WC2389", "AP39TV2537", "AP39VE2979", 
-            "AP39WD5679", "AP31TN2579", "AP39UJ2489", "AP39TV2536", "AP39WD8349", 
-            "AP39UY3345", "AP39UY3435", "AP39VC5289", "AP39WD4199", "AP39WC7449", 
-            "AP39UZ3335", "AP39UH2489", "AP31TN4302", "AP39VB8829", "AP39UU5665", 
+            "AP39UJ1166", "AP39UJ2399", "AP39UZ3659", "AP39VF1899", "AP39UJ5678",
+            "AP39VF2339", "AP39W3579", "AP39WC2389", "AP39TV2537", "AP39VE2979",
+            "AP39WD5679", "AP31TN2579", "AP39UJ2489", "AP39TV2536", "AP39WD8349",
+            "AP39UY3345", "AP39UY3435", "AP39VC5289", "AP39WD4199", "AP39WC7449",
+            "AP39UZ3335", "AP39UH2489", "AP31TN4302", "AP39VB8829", "AP39UU5665",
             "AP39VB2427", "AP39UD1589", "AP39UF3245", "AP39UG0559"
         ];
-
         // Store report data for PDF export
         let currentDispatchReportData = null;
+        let currentFtdReportData = null;
         let currentTransportReportData = null;
-
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize vehicle dropdown
             const vehicleDropdown = document.getElementById('vehicleDropdown');
@@ -505,15 +513,16 @@
                 option.textContent = vehicle;
                 vehicleDropdown.appendChild(option);
             });
-            
+           
             // Set default dates to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('accountingDate').value = today;
             document.getElementById('date').value = today;
             document.getElementById('dispatchReportDate').value = today;
+            document.getElementById('ftdReportDate').value = today;
             document.getElementById('transportBillStartDate').value = today;
             document.getElementById('transportBillEndDate').value = today;
-            
+           
             // Event listeners for calculations
             document.getElementById('grossWt').addEventListener('input', calculateValues);
             document.getElementById('tareWt').addEventListener('input', calculateValues);
@@ -522,40 +531,40 @@
             document.getElementById('transportRate').addEventListener('input', calculateValues);
             document.getElementById('cashReceived').addEventListener('input', calculateValues);
             document.getElementById('advanceReceived').addEventListener('input', calculateValues);
-            
+           
             // Vehicle dropdown change event
             document.getElementById('vehicleDropdown').addEventListener('change', function() {
                 if (this.value) {
                     document.getElementById('vehicleNo').value = this.value;
                 }
             });
-            
+           
             // Add new vehicle button
             document.getElementById('btnAddVehicle').addEventListener('click', function() {
                 const modal = new bootstrap.Modal(document.getElementById('addVehicleModal'));
                 modal.show();
             });
-            
+           
             // Save new vehicle
             document.getElementById('btnSaveVehicle').addEventListener('click', function() {
                 const newVehicleNo = document.getElementById('newVehicleNo').value.trim().toUpperCase();
                 if (newVehicleNo && !vehicleNumbers.includes(newVehicleNo)) {
                     vehicleNumbers.push(newVehicleNo);
-                    
+                   
                     // Add to dropdown
                     const option = document.createElement('option');
                     option.value = newVehicleNo;
                     option.textContent = newVehicleNo;
                     document.getElementById('vehicleDropdown').appendChild(option);
-                    
+                   
                     // Set as selected
                     document.getElementById('vehicleDropdown').value = newVehicleNo;
                     document.getElementById('vehicleNo').value = newVehicleNo;
-                    
+                   
                     // Close modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addVehicleModal'));
                     modal.hide();
-                    
+                   
                     // Clear input
                     document.getElementById('newVehicleNo').value = '';
                 } else if (vehicleNumbers.includes(newVehicleNo)) {
@@ -564,68 +573,62 @@
                     alert("Please enter a valid vehicle number.");
                 }
             });
-            
-            // Manual calculation button
-            document.getElementById('btnCalculate').addEventListener('click', calculateAllValues);
-            
+           
             // Report generation buttons
             document.getElementById('btnDispatchReport').addEventListener('click', generateDispatchReport);
+            document.getElementById('btnFtdReport').addEventListener('click', generateFtdReport);
             document.getElementById('btnTransportBill').addEventListener('click', generateTransportBill);
-            
+           
             // PDF download buttons
             document.getElementById('btnDownloadDispatchPDF').addEventListener('click', downloadDispatchPDF);
+            document.getElementById('btnDownloadFtdPDF').addEventListener('click', downloadFtdPDF);
             document.getElementById('btnDownloadTransportPDF').addEventListener('click', downloadTransportPDF);
-            
+           
             // Form submission
             document.getElementById('weighmentForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 addRecord();
             });
-            
+           
             // Export to Excel button
             document.getElementById('btnExportExcel').addEventListener('click', exportToExcel);
-            
+           
             function calculateValues() {
                 // Calculate Net Weight
                 const grossWt = parseFloat(document.getElementById('grossWt').value) || 0;
                 const tareWt = parseFloat(document.getElementById('tareWt').value) || 0;
                 const netWt = grossWt - tareWt;
                 document.getElementById('netWt').value = netWt.toFixed(2);
-                
+               
                 // Calculate Sale Amount
                 const ratePerTone = parseFloat(document.getElementById('ratePerTone').value) || 0;
                 const saleAmount = netWt * ratePerTone;
                 document.getElementById('saleAmount').value = saleAmount.toFixed(2);
-                
+               
                 // Calculate Royalty Amount
                 const royaltyRate = parseFloat(document.getElementById('royaltyRate').value) || 0;
                 const royaltyAmount = netWt * royaltyRate;
                 document.getElementById('royaltyAmount').value = royaltyAmount.toFixed(2);
-                
+               
                 // Calculate Transport Amount
                 const transportRate = parseFloat(document.getElementById('transportRate').value) || 0;
                 const transportAmount = netWt * transportRate;
                 document.getElementById('transportAmount').value = transportAmount.toFixed(2);
-                
+               
                 // Calculate Total Amount
                 const totalAmount = saleAmount + royaltyAmount + transportAmount;
                 document.getElementById('totalAmount').value = totalAmount.toFixed(2);
-                
+               
                 // Calculate Customer Balance
                 const cashReceived = parseFloat(document.getElementById('cashReceived').value) || 0;
                 const advanceReceived = parseFloat(document.getElementById('advanceReceived').value) || 0;
                 const customerBalance = totalAmount - cashReceived - advanceReceived;
                 document.getElementById('customerBalance').value = customerBalance.toFixed(2);
             }
-            
-            function calculateAllValues() {
-                calculateValues();
-                alert("All values have been calculated.");
-            }
-            
+           
             function addRecord() {
                 calculateValues();
-                
+               
                 // Get form values
                 const record = {
                     id: recordIdCounter++,
@@ -657,30 +660,30 @@
                     totalAmount: parseFloat(document.getElementById('totalAmount').value) || 0,
                     remarks: document.getElementById('remarks').value
                 };
-                
+               
                 // Add to records array
                 allRecords.push(record);
-                
+               
                 // Update the records table
                 updateRecordsTable();
-                
+               
                 // Reset the form
                 document.getElementById('weighmentForm').reset();
-                
+               
                 // Set default dates to today again
                 document.getElementById('accountingDate').value = today;
                 document.getElementById('date').value = today;
-                
+               
                 alert("Record added successfully!");
             }
-            
+           
             function updateRecordsTable() {
                 // Get the table body
                 const tableBody = document.getElementById('recordsTable');
-                
+               
                 // Clear the table
                 tableBody.innerHTML = '';
-                
+               
                 if (allRecords.length === 0) {
                     const row = tableBody.insertRow();
                     const cell = row.insertCell(0);
@@ -689,11 +692,11 @@
                     cell.className = 'text-center';
                     return;
                 }
-                
+               
                 // Add each record to the table
                 allRecords.forEach((record, index) => {
                     const row = tableBody.insertRow();
-                    
+                   
                     // Add cells with data
                     row.insertCell(0).textContent = index + 1;
                     row.insertCell(1).textContent = record.accountingDate;
@@ -722,31 +725,31 @@
                     row.insertCell(24).textContent = record.transportRate.toFixed(2);
                     row.insertCell(25).textContent = record.transportAmount.toFixed(2);
                     row.insertCell(26).textContent = record.totalAmount.toFixed(2);
-                    
+                   
                     // Add actions cell
                     const actionsCell = row.insertCell(27);
                     actionsCell.innerHTML = '<button class="btn btn-sm btn-info">View</button> <button class="btn btn-sm btn-danger">Delete</button>';
-                    
+                   
                     // Add event listener to delete button
                     actionsCell.querySelector('.btn-danger').addEventListener('click', function() {
                         // Remove from records array
                         allRecords = allRecords.filter(r => r.id !== record.id);
-                        
+                       
                         // Update the table
                         updateRecordsTable();
                     });
                 });
             }
-            
+           
             function generateDispatchReport() {
                 const reportDate = document.getElementById('dispatchReportDate').value;
                 const reportShift = document.getElementById('dispatchReportShift').value;
-                
+               
                 if (!reportDate) {
                     alert("Please select a date for the report.");
                     return;
                 }
-                
+               
                 // Filter records for the selected date and shift
                 let dateRecords;
                 if (reportShift === "ALL") {
@@ -754,51 +757,45 @@
                 } else {
                     dateRecords = allRecords.filter(record => record.date === reportDate && record.shift === reportShift);
                 }
-                
+               
                 if (dateRecords.length === 0) {
                     alert("No records found for the selected criteria.");
                     document.getElementById('dispatchReportActions').style.display = 'none';
                     return;
                 }
-                
+               
                 // Group records by customer and material
                 const customerData = {};
                 const materialTypes = ["10 MM", "20 MM", "V/SAND", "Scalping", "P/Sand", "40MM", "GSB/WET MIX", "R/Sand"];
-                
+               
                 dateRecords.forEach(record => {
                     if (!customerData[record.customerName]) {
                         customerData[record.customerName] = {
-                            vehicles: new Set(),
                             totalTonnage: 0,
                             totalTrips: 0,
                             materials: {}
                         };
-                        
+                       
                         // Initialize all material types
                         materialTypes.forEach(material => {
                             customerData[record.customerName].materials[material] = {
-                                vehicles: 0,
                                 tonnage: 0,
                                 trips: 0
                             };
                         });
                     }
-                    
-                    // Add vehicle to set (to count unique vehicles)
-                    customerData[record.customerName].vehicles.add(record.vehicleNo);
-                    
+                   
                     // Add to total tonnage and trips
                     customerData[record.customerName].totalTonnage += record.netWt;
                     customerData[record.customerName].totalTrips += 1;
-                    
+                   
                     // Add to specific material
                     if (customerData[record.customerName].materials[record.materialType]) {
-                        customerData[record.customerName].materials[record.materialType].vehicles += 1;
                         customerData[record.customerName].materials[record.materialType].tonnage += record.netWt;
                         customerData[record.customerName].materials[record.materialType].trips += 1;
                     }
                 });
-                
+               
                 // Store data for PDF export
                 currentDispatchReportData = {
                     date: reportDate,
@@ -806,170 +803,319 @@
                     customerData: customerData,
                     materialTypes: materialTypes
                 };
-                
+               
                 // Show download button
                 document.getElementById('dispatchReportActions').style.display = 'block';
-                
+               
                 // Create report table
                 let reportHTML = '<table class="table table-bordered">';
-                
+               
                 // Add title row
                 const formattedDate = formatDate(reportDate);
                 if (reportShift === "ALL") {
-                    reportHTML += `<tr class="shift-header"><th colspan="13">FULL DAY - Dispatch Vehicle Wise Planning - ${formattedDate}</th></tr>`;
+                    reportHTML += `<tr class="shift-header"><th colspan="11">FULL DAY - Dispatch Vehicle Wise Planning - ${formattedDate}</th></tr>`;
                 } else {
-                    reportHTML += `<tr class="shift-header"><th colspan="13">${reportShift} - Dispatch Vehicle Wise Planning - ${formattedDate}</th></tr>`;
+                    reportHTML += `<tr class="shift-header"><th colspan="11">${reportShift} - Dispatch Vehicle Wise Planning - ${formattedDate}</th></tr>`;
                 }
-                
+               
                 // Add header row
                 reportHTML += '<tr class="customer-header">';
                 reportHTML += '<th>Customer Name</th>';
-                reportHTML += '<th>Unit (Nos., MT)</th>';
+                reportHTML += '<th>Unit</th>';
                 materialTypes.forEach(material => {
                     reportHTML += `<th>${material}</th>`;
                 });
                 reportHTML += '<th>TOTAL</th>';
                 reportHTML += '</tr>';
-                
+               
                 // Add customer rows
-                let grandTotalVehicles = 0;
                 let grandTotalTonnage = 0;
                 let grandTotalTrips = 0;
                 const materialTotals = {};
                 materialTypes.forEach(material => {
-                    materialTotals[material] = { vehicles: 0, tonnage: 0, trips: 0 };
+                    materialTotals[material] = { tonnage: 0, trips: 0 };
                 });
-                
+               
                 for (const customer in customerData) {
                     // Customer name row
-                    reportHTML += `<tr><td rowspan="3">${customer}</td><td>No. of Vehicles</td>`;
-                    
-                    // Vehicle counts by material
-                    materialTypes.forEach(material => {
-                        const vehicleCount = customerData[customer].materials[material].vehicles;
-                        reportHTML += `<td class="number-cell">${vehicleCount || ''}</td>`;
-                        materialTotals[material].vehicles += vehicleCount;
-                    });
-                    
-                    // Total vehicles for this customer
-                    const customerVehicleCount = customerData[customer].vehicles.size;
-                    reportHTML += `<td class="number-cell">${customerVehicleCount}</td>`;
-                    grandTotalVehicles += customerVehicleCount;
-                    
-                    reportHTML += '</tr>';
-                    
-                    // Tonnage row
-                    reportHTML += `<tr><td>Total Tonnage (MT)</td>`;
-                    
+                    reportHTML += `<tr><td rowspan="2" style="background-color: #d8bfd8; font-weight: bold;">${customer}</td><td>Total Tonnage (MT)</td>`;
+                   
                     // Tonnage by material
                     materialTypes.forEach(material => {
                         const tonnage = customerData[customer].materials[material].tonnage;
                         reportHTML += `<td class="number-cell">${tonnage > 0 ? tonnage.toFixed(2) : ''}</td>`;
                         materialTotals[material].tonnage += tonnage;
                     });
-                    
+                   
                     // Total tonnage for this customer
                     reportHTML += `<td class="number-cell">${customerData[customer].totalTonnage.toFixed(2)}</td>`;
                     grandTotalTonnage += customerData[customer].totalTonnage;
-                    
+                   
                     reportHTML += '</tr>';
-                    
+                   
                     // Trips row
                     reportHTML += `<tr><td>Total Trips</td>`;
-                    
+                   
                     // Trips by material
                     materialTypes.forEach(material => {
                         const trips = customerData[customer].materials[material].trips;
                         reportHTML += `<td class="number-cell">${trips > 0 ? trips : ''}</td>`;
                         materialTotals[material].trips += trips;
                     });
-                    
+                   
                     // Total trips for this customer
                     reportHTML += `<td class="number-cell">${customerData[customer].totalTrips}</td>`;
                     grandTotalTrips += customerData[customer].totalTrips;
-                    
+                   
                     reportHTML += '</tr>';
                 }
-                
+               
                 // Add totals row
                 reportHTML += '<tr class="total-header">';
-                reportHTML += '<td colspan="2">TOTAL</td>';
-                
-                // Vehicle totals by material
-                materialTypes.forEach(material => {
-                    reportHTML += `<td class="number-cell">${materialTotals[material].vehicles > 0 ? materialTotals[material].vehicles : ''}</td>`;
-                });
-                
-                // Grand total vehicles
-                reportHTML += `<td class="number-cell">${grandTotalVehicles}</td>`;
-                reportHTML += '</tr>';
-                
-                // Tonnage totals row
-                reportHTML += '<tr class="total-header">';
-                reportHTML += '<td colspan="2"></td>';
-                
+                reportHTML += '<td colspan="2">TOTAL Tonnage (MT)</td>';
+               
                 // Tonnage totals by material
                 materialTypes.forEach(material => {
                     reportHTML += `<td class="number-cell">${materialTotals[material].tonnage > 0 ? materialTotals[material].tonnage.toFixed(2) : ''}</td>`;
                 });
-                
+               
                 // Grand total tonnage
                 reportHTML += `<td class="number-cell">${grandTotalTonnage.toFixed(2)}</td>`;
                 reportHTML += '</tr>';
-                
+               
                 // Trips totals row
                 reportHTML += '<tr class="total-header">';
-                reportHTML += '<td colspan="2"></td>';
-                
+                reportHTML += '<td colspan="2">TOTAL Trips</td>';
+               
                 // Trips totals by material
                 materialTypes.forEach(material => {
                     reportHTML += `<td class="number-cell">${materialTotals[material].trips > 0 ? materialTotals[material].trips : ''}</td>`;
                 });
-                
+               
                 // Grand total trips
                 reportHTML += `<td class="number-cell">${grandTotalTrips}</td>`;
                 reportHTML += '</tr>';
-                
+               
                 reportHTML += '</table>';
-                
+               
                 // Display the report
                 document.getElementById('dispatchReportContainer').innerHTML = reportHTML;
             }
-            
+           
+            function generateFtdReport() {
+                const reportDate = document.getElementById('ftdReportDate').value;
+                let reportShift = document.getElementById('ftdReportShift').value;
+               
+                if (!reportDate) {
+                    alert("Please select a date for the report.");
+                    return;
+                }
+               
+                // Filter records for the selected date
+                let dateRecords = allRecords.filter(record => record.date === reportDate);
+               
+                if (dateRecords.length === 0) {
+                    alert("No records found for the selected criteria.");
+                    document.getElementById('ftdReportActions').style.display = 'none';
+                    return;
+                }
+               
+                const formattedDate = formatDate(reportDate);
+                let reportHTML = `<div style="text-align: right; margin-bottom: 10px;">Date: ${formattedDate}</div>`;
+               
+                let shiftsToProcess;
+                if (reportShift === "ALL") {
+                    const shiftSet = new Set(dateRecords.map(r => r.shift));
+                    shiftsToProcess = Array.from(shiftSet).sort();
+                } else {
+                    shiftsToProcess = [reportShift];
+                    dateRecords = dateRecords.filter(record => record.shift === reportShift);
+                }
+               
+                // Prepare data for PDF
+                currentFtdReportData = {
+                    date: reportDate,
+                    shifts: {}
+                };
+               
+                shiftsToProcess.forEach(shiftValue => {
+                    const shiftRecords = dateRecords.filter(record => record.shift === shiftValue);
+                    if (shiftRecords.length === 0) return;
+                   
+                    // Group records by customer and material
+                    const customerData = {};
+                    const materialTypes = ["10 MM", "20 MM", "V/SAND", "Scalping", "P/Sand", "40MM", "GSB/WET MIX", "R/Sand"];
+                   
+                    // Overall for shift
+                    const materialVehicleSets = {};
+                    const grandVehicleSet = new Set();
+                    let grandTotalTonnage = 0;
+                    const materialTotals = {};
+                    materialTypes.forEach(material => {
+                        materialVehicleSets[material] = new Set();
+                        materialTotals[material] = { tonnage: 0 };
+                    });
+                   
+                    shiftRecords.forEach(record => {
+                        if (!customerData[record.customerName]) {
+                            customerData[record.customerName] = {
+                                vehicles: new Set(),
+                                materialVehicles: {},
+                                totalTonnage: 0,
+                                materials: {}
+                            };
+                            materialTypes.forEach(material => {
+                                customerData[record.customerName].materialVehicles[material] = new Set();
+                                customerData[record.customerName].materials[material] = { tonnage: 0 };
+                            });
+                        }
+                       
+                        // Add to customer
+                        customerData[record.customerName].vehicles.add(record.vehicleNo);
+                        customerData[record.customerName].totalTonnage += record.netWt;
+                        customerData[record.customerName].materialVehicles[record.materialType].add(record.vehicleNo);
+                        customerData[record.customerName].materials[record.materialType].tonnage += record.netWt;
+                       
+                        // Add to overall
+                        grandVehicleSet.add(record.vehicleNo);
+                        materialVehicleSets[record.materialType].add(record.vehicleNo);
+                        materialTotals[record.materialType].tonnage += record.netWt;
+                        grandTotalTonnage += record.netWt;
+                    });
+                   
+                    // Store for PDF
+                    currentFtdReportData.shifts[shiftValue] = {
+                        customerData,
+                        materialTypes,
+                        materialVehicleSets,
+                        grandVehicleSet,
+                        grandTotalTonnage,
+                        materialTotals
+                    };
+                   
+                    // Build HTML for this shift
+                    reportHTML += '<table class="table table-bordered" style="margin-bottom: 20px;">';
+                   
+                    // Add shift title
+                    reportHTML += `<tr class="shift-header"><th colspan="11">${shiftValue} - Dispatch Vehicle Wise Planning</th></tr>`;
+                   
+                    // Add header row
+                    reportHTML += '<tr class="customer-header">';
+                    reportHTML += '<th>Customer Name</th>';
+                    reportHTML += '<th>Unit</th>';
+                    materialTypes.forEach(material => {
+                        reportHTML += `<th>${material}</th>`;
+                    });
+                    reportHTML += '<th>TOTAL</th>';
+                    reportHTML += '</tr>';
+                   
+                    // Add customer rows
+                    for (const customer in customerData) {
+                        // Customer name row
+                        reportHTML += `<tr><td rowspan="2" style="background-color: #d8bfd8; font-weight: bold;">${customer}</td><td>No. of Vehicles</td>`;
+                       
+                        // Vehicles by material
+                        materialTypes.forEach(material => {
+                            const count = customerData[customer].materialVehicles[material].size;
+                            reportHTML += `<td class="number-cell">${count > 0 ? count : ''}</td>`;
+                        });
+                       
+                        // Total vehicles for customer
+                        reportHTML += `<td class="number-cell">${customerData[customer].vehicles.size}</td>`;
+                        reportHTML += '</tr>';
+                       
+                        // Tonnage row
+                        reportHTML += `<tr><td>Total Tonnage (MT)</td>`;
+                       
+                        // Tonnage by material
+                        materialTypes.forEach(material => {
+                            const tonnage = customerData[customer].materials[material].tonnage;
+                            reportHTML += `<td class="number-cell">${tonnage > 0 ? tonnage.toFixed(2) : ''}</td>`;
+                        });
+                       
+                        // Total tonnage for customer
+                        reportHTML += `<td class="number-cell">${customerData[customer].totalTonnage.toFixed(2)}</td>`;
+                        reportHTML += '</tr>';
+                    }
+                   
+                    // Add totals rows
+                    reportHTML += '<tr class="total-header">';
+                    reportHTML += '<td colspan="2">Total No of Vehicles</td>';
+                   
+                    // Vehicles totals by material
+                    materialTypes.forEach(material => {
+                        const count = materialVehicleSets[material].size;
+                        reportHTML += `<td class="number-cell">${count > 0 ? count : ''}</td>`;
+                    });
+                   
+                    // Grand total vehicles
+                    reportHTML += `<td class="number-cell">${grandVehicleSet.size}</td>`;
+                    reportHTML += '</tr>';
+                   
+                    reportHTML += '<tr class="total-header">';
+                    reportHTML += '<td colspan="2">Total Tonnage (MT)</td>';
+                   
+                    // Tonnage totals by material
+                    materialTypes.forEach(material => {
+                        reportHTML += `<td class="number-cell">${materialTotals[material].tonnage > 0 ? materialTotals[material].tonnage.toFixed(2) : ''}</td>`;
+                    });
+                   
+                    // Grand total tonnage
+                    reportHTML += `<td class="number-cell">${grandTotalTonnage.toFixed(2)}</td>`;
+                    reportHTML += '</tr>';
+                   
+                    reportHTML += '</table>';
+                });
+               
+                if (shiftsToProcess.length === 0) {
+                    reportHTML += '<p>No data available for the selected shifts.</p>';
+                }
+               
+                // Display the report
+                document.getElementById('ftdReportContainer').innerHTML = reportHTML;
+               
+                // Show download button if data exists
+                if (Object.keys(currentFtdReportData.shifts).length > 0) {
+                    document.getElementById('ftdReportActions').style.display = 'block';
+                } else {
+                    document.getElementById('ftdReportActions').style.display = 'none';
+                }
+            }
+           
             function generateTransportBill() {
                 const startDate = document.getElementById('transportBillStartDate').value;
                 const endDate = document.getElementById('transportBillEndDate').value;
                 const vehicleNo = document.getElementById('transportBillVehicle').value.trim();
-                
+               
                 if (!startDate || !endDate) {
                     alert("Please select a date range for the report.");
                     return;
                 }
-                
+               
                 // Filter records for the selected date range and optional vehicle
                 let dateRecords;
                 if (vehicleNo) {
-                    dateRecords = allRecords.filter(record => 
-                        record.date >= startDate && 
-                        record.date <= endDate && 
+                    dateRecords = allRecords.filter(record =>
+                        record.date >= startDate &&
+                        record.date <= endDate &&
                         record.vehicleNo === vehicleNo
                     );
                 } else {
-                    dateRecords = allRecords.filter(record => 
-                        record.date >= startDate && 
+                    dateRecords = allRecords.filter(record =>
+                        record.date >= startDate &&
                         record.date <= endDate
                     );
                 }
-                
+               
                 if (dateRecords.length === 0) {
                     alert("No records found for the selected criteria.");
                     document.getElementById('transportReportActions').style.display = 'none';
                     return;
                 }
-                
+               
                 // Group records by vehicle
                 const vehicleData = {};
-                
+               
                 dateRecords.forEach(record => {
                     if (!vehicleData[record.vehicleNo]) {
                         vehicleData[record.vehicleNo] = {
@@ -979,26 +1125,26 @@
                             transactions: []
                         };
                     }
-                    
+                   
                     vehicleData[record.vehicleNo].trips += 1;
                     vehicleData[record.vehicleNo].totalTonnage += record.netWt;
                     vehicleData[record.vehicleNo].transportAmount += record.transportAmount;
                     vehicleData[record.vehicleNo].transactions.push({
                         date: record.date,
                         shift: record.shift,
-                        customerName: record.customerName, // Added client name
+                        customerName: record.customerName,
                         material: record.materialType,
                         netWt: record.netWt,
                         transportRate: record.transportRate,
                         transportAmount: record.transportAmount
                     });
                 });
-                
+               
                 // Sort transactions by date
                 for (const vehicle in vehicleData) {
                     vehicleData[vehicle].transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
                 }
-                
+               
                 // Store data for PDF export
                 currentTransportReportData = {
                     startDate: startDate,
@@ -1006,33 +1152,33 @@
                     vehicleNo: vehicleNo,
                     vehicleData: vehicleData
                 };
-                
+               
                 // Show download button
                 document.getElementById('transportReportActions').style.display = 'block';
-                
+               
                 // Update the report table
                 const tableBody = document.querySelector('#transportBillTable tbody');
                 tableBody.innerHTML = '';
-                
+               
                 let totalTransportAmount = 0;
                 let totalTonnage = 0;
                 let totalTrips = 0;
-                
+               
                 for (const vehicle in vehicleData) {
                     const data = vehicleData[vehicle];
-                    
+                   
                     const row = tableBody.insertRow();
                     row.insertCell(0).textContent = vehicle;
                     row.insertCell(1).textContent = data.trips;
                     row.insertCell(2).textContent = data.totalTonnage.toFixed(2);
                     row.insertCell(3).textContent = data.transportAmount.toFixed(2);
-                    
+                   
                     // Create transaction details cell
                     const detailsCell = row.insertCell(4);
-                    
+                   
                     let detailsHTML = '<div class="transaction-details">';
                     detailsHTML += '<strong>Transaction Details:</strong>';
-                    
+                   
                     data.transactions.forEach(transaction => {
                         detailsHTML += `
                             <div class="transaction-row">
@@ -1045,15 +1191,15 @@
                             </div>
                         `;
                     });
-                    
+                   
                     detailsHTML += '</div>';
                     detailsCell.innerHTML = detailsHTML;
-                    
+                   
                     totalTransportAmount += data.transportAmount;
                     totalTonnage += data.totalTonnage;
                     totalTrips += data.trips;
                 }
-                
+               
                 // Add total row
                 const totalRow = tableBody.insertRow();
                 totalRow.classList.add('table-active');
@@ -1063,51 +1209,43 @@
                 totalRow.insertCell(3).textContent = totalTransportAmount.toFixed(2);
                 totalRow.insertCell(4).textContent = '';
             }
-            
+           
             function downloadDispatchPDF() {
                 if (!currentDispatchReportData) {
                     alert("No dispatch report data available to download.");
                     return;
                 }
-                
+               
                 const { date, shift, customerData, materialTypes } = currentDispatchReportData;
-                
+               
                 // Create new PDF document
                 const doc = new jsPDF();
-                
+               
                 // Add title
                 const formattedDate = formatDate(date);
-                const title = shift === "ALL" 
+                const title = shift === "ALL"
                     ? `FULL DAY - Dispatch Vehicle Wise Planning - ${formattedDate}`
                     : `${shift} - Dispatch Vehicle Wise Planning - ${formattedDate}`;
-                
+               
                 doc.setFontSize(16);
                 doc.text(title, 14, 15);
-                
+               
                 // Prepare table data
                 const tableData = [];
                 const headers = ['Customer Name', 'Unit', ...materialTypes, 'TOTAL'];
-                
+               
                 // Add customer data
                 for (const customer in customerData) {
                     const data = customerData[customer];
-                    
-                    // Vehicles row
-                    const vehiclesRow = [customer, 'No. of Vehicles'];
-                    materialTypes.forEach(material => {
-                        vehiclesRow.push(data.materials[material].vehicles || '');
-                    });
-                    vehiclesRow.push(data.vehicles.size);
-                    tableData.push(vehiclesRow);
-                    
+                   
                     // Tonnage row
-                    const tonnageRow = ['', 'Total Tonnage (MT)'];
+                    const tonnageRow = [customer, 'Total Tonnage (MT)'];
                     materialTypes.forEach(material => {
                         tonnageRow.push(data.materials[material].tonnage > 0 ? data.materials[material].tonnage.toFixed(2) : '');
                     });
                     tonnageRow.push(data.totalTonnage.toFixed(2));
                     tableData.push(tonnageRow);
-                    
+                   
                     // Trips row
                     const tripsRow = ['', 'Total Trips'];
                     materialTypes.forEach(material => {
@@ -1115,11 +1253,11 @@
                     });
                     tripsRow.push(data.totalTrips);
                     tableData.push(tripsRow);
-                    
+                   
                     // Empty row for spacing
-                    tableData.push(['', '', '', '', '', '', '', '', '', '']);
+                    tableData.push(['', '', '', '', '', '', '', '', '', '', '']);
                 }
-                
+               
                 // Add table to PDF
                 doc.autoTable({
                     head: [headers],
@@ -1129,23 +1267,126 @@
                     styles: { fontSize: 8 },
                     headStyles: { fillColor: [100, 100, 100] }
                 });
-                
+               
                 // Save the PDF
                 const fileName = `Dispatch_Report_${date}_${shift.replace(' ', '_')}.pdf`;
                 doc.save(fileName);
             }
-            
+           
+            function downloadFtdPDF() {
+                if (!currentFtdReportData) {
+                    alert("No FTD report data available to download.");
+                    return;
+                }
+               
+                const { date, shifts } = currentFtdReportData;
+               
+                // Create new PDF document
+                const doc = new jsPDF();
+               
+                // Add date
+                const formattedDate = formatDate(date);
+                doc.setFontSize(12);
+                doc.text(`Date: ${formattedDate}`, 170, 15, { align: 'right' });
+               
+                let startY = 25;
+               
+                for (const shiftValue in shifts) {
+                    const { customerData, materialTypes, materialVehicleSets, grandVehicleSet, grandTotalTonnage, materialTotals } = shifts[shiftValue];
+                   
+                    // Add shift title
+                    doc.setFontSize(14);
+                    doc.text(`${shiftValue} - Dispatch Vehicle Wise Planning`, 14, startY);
+                    startY += 10;
+                   
+                    // Prepare table data
+                    const tableData = [];
+                    const headers = ['Customer Name', 'Unit', ...materialTypes, 'TOTAL'];
+                   
+                    // Add customer data
+                    for (const customer in customerData) {
+                        const data = customerData[customer];
+                       
+                        // Vehicles row
+                        const vehiclesRow = [customer, 'No. of Vehicles'];
+                        materialTypes.forEach(material => {
+                            vehiclesRow.push(data.materialVehicles[material].size > 0 ? data.materialVehicles[material].size : '');
+                        });
+                        vehiclesRow.push(data.vehicles.size);
+                        tableData.push(vehiclesRow);
+                       
+                        // Tonnage row
+                        const tonnageRow = ['', 'Total Tonnage (MT)'];
+                        materialTypes.forEach(material => {
+                            tonnageRow.push(data.materials[material].tonnage > 0 ? data.materials[material].tonnage.toFixed(2) : '');
+                        });
+                        tonnageRow.push(data.totalTonnage.toFixed(2));
+                        tableData.push(tonnageRow);
+                       
+                        // Empty row for spacing
+                        tableData.push(['', '', '', '', '', '', '', '', '', '', '']);
+                    }
+                   
+                    // Add totals
+                    const totalVehiclesRow = ['TOTAL', 'No. of Vehicles'];
+                    materialTypes.forEach(material => {
+                        totalVehiclesRow.push(materialVehicleSets[material].size > 0 ? materialVehicleSets[material].size : '');
+                    });
+                    totalVehiclesRow.push(grandVehicleSet.size);
+                    tableData.push(totalVehiclesRow);
+                   
+                    const totalTonnageRow = ['', 'Total Tonnage (MT)'];
+                    materialTypes.forEach(material => {
+                        totalTonnageRow.push(materialTotals[material].tonnage > 0 ? materialTotals[material].tonnage.toFixed(2) : '');
+                    });
+                    totalTonnageRow.push(grandTotalTonnage.toFixed(2));
+                    tableData.push(totalTonnageRow);
+                   
+                    // Add table to PDF
+                    doc.autoTable({
+                        head: [headers],
+                        body: tableData,
+                        startY: startY,
+                        theme: 'grid',
+                        styles: { fontSize: 8 },
+                        headStyles: { fillColor: [100, 100, 100] },
+                        didParseCell: function (data) {
+                            if (data.row.section === 'body' && data.column.index === 0 && data.row.span === 2) {
+                                data.cell.styles.fillColor = [216, 191, 216]; // light purple
+                            }
+                            if (data.row.cells[0].text[0] === 'TOTAL') {
+                                data.row.cells.forEach(cell => {
+                                    cell.styles.fillColor = [144, 238, 144]; // green
+                                    cell.styles.fontStyle = 'bold';
+                                });
+                            }
+                        }
+                    });
+                   
+                    startY = doc.lastAutoTable.finalY + 20;
+                   
+                    if (startY > 250) {
+                        doc.addPage();
+                        startY = 20;
+                    }
+                }
+               
+                // Save the PDF
+                const fileName = `FTD_Report_${date}.pdf`;
+                doc.save(fileName);
+            }
+           
             function downloadTransportPDF() {
                 if (!currentTransportReportData) {
                     alert("No transport report data available to download.");
                     return;
                 }
-                
+               
                 const { startDate, endDate, vehicleNo, vehicleData } = currentTransportReportData;
-                
+               
                 // Create new PDF document
                 const doc = new jsPDF();
-                
+               
                 // Add title
                 const title = `Transport Bill Report - ${formatDate(startDate)} to ${formatDate(endDate)}`;
                 if (vehicleNo) {
@@ -1157,19 +1398,19 @@
                     doc.setFontSize(16);
                     doc.text(title, 14, 15);
                 }
-                
+               
                 // Prepare table data
                 const tableData = [];
-                
+               
                 for (const vehicle in vehicleData) {
                     const data = vehicleData[vehicle];
-                    
+                   
                     // Add vehicle header
                     tableData.push([{content: `Vehicle: ${vehicle}`, colSpan: 5, styles: {fillColor: [200, 200, 200]}}]);
-                    
+                   
                     // Add transaction headers
                     tableData.push(['Date', 'Client', 'Material', 'Net WT (MT)', 'Amount (₹)']);
-                    
+                   
                     // Add transactions
                     data.transactions.forEach(transaction => {
                         tableData.push([
@@ -1180,18 +1421,18 @@
                             transaction.transportAmount.toFixed(2)
                         ]);
                     });
-                    
+                   
                     // Add vehicle totals
                     tableData.push([
                         {content: 'TOTAL', colSpan: 3, styles: {fontStyle: 'bold'}},
                         data.totalTonnage.toFixed(2),
                         data.transportAmount.toFixed(2)
                     ]);
-                    
+                   
                     // Add empty row for spacing
                     tableData.push(['', '', '', '', '']);
                 }
-                
+               
                 // Add table to PDF
                 doc.autoTable({
                     body: tableData,
@@ -1200,18 +1441,18 @@
                     styles: { fontSize: 8 },
                     headStyles: { fillColor: [100, 100, 100] }
                 });
-                
+               
                 // Save the PDF
                 const fileName = `Transport_Bill_${startDate}_to_${endDate}${vehicleNo ? '_' + vehicleNo : ''}.pdf`;
                 doc.save(fileName);
             }
-            
+           
             function exportToExcel() {
                 if (allRecords.length === 0) {
                     alert("No records to export.");
                     return;
                 }
-                
+               
                 // Prepare data for export
                 const data = allRecords.map(record => ({
                     "S.NO": record.id,
@@ -1242,21 +1483,21 @@
                     "Transport Amount": record.transportAmount,
                     "Total Amount": record.totalAmount
                 }));
-                
+               
                 // Create worksheet
                 const ws = XLSX.utils.json_to_sheet(data);
-                
+               
                 // Create workbook
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Weighment Records");
-                
+               
                 // Generate file name with current date
                 const fileName = `Weighment_Data_${new Date().toISOString().split('T')[0]}.xlsx`;
-                
+               
                 // Export to Excel
                 XLSX.writeFile(wb, fileName);
             }
-            
+           
             function formatDate(dateString) {
                 const date = new Date(dateString);
                 const day = date.getDate();
@@ -1264,7 +1505,7 @@
                 const year = date.getFullYear();
                 return `${day}-${month}-${year}`;
             }
-            
+           
             // Initialize the records table
             updateRecordsTable();
         });
