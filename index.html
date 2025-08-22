@@ -127,6 +127,34 @@
             margin-top: 15px;
             margin-bottom: 15px;
         }
+        .month-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 8px 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .vehicle-row {
+            background-color: #f0f8ff;
+        }
+        .month-total {
+            background-color: #e6f7ff;
+            font-weight: bold;
+        }
+        .grand-total {
+            background-color: #d4edda;
+            font-weight: bold;
+        }
+        .btn-black {
+            background-color: #000;
+            color: white;
+            border: none;
+        }
+        .btn-black:hover {
+            background-color: #333;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -318,6 +346,7 @@
             <div class="btn-container">
                 <button type="submit" class="btn btn-success">Save Entry</button>
                 <button type="button" class="btn btn-primary" id="btnExportExcel">Export to Excel</button>
+                <button type="button" class="btn btn-warning" id="btnClearStorage">Clear All Data</button>
             </div>
         </form>
     </div>
@@ -409,11 +438,14 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label">&nbsp;</label>
-                <button type="button" class="btn btn-primary form-control" id="btnFtdReport">Generate FTD Report</button>
+                <button type="button" class="btn btn-black form-control" id="btnFtdReport">Generate FTD Report</button>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <div id="selectedDateDisplay" style="font-weight: bold;"></div>
             </div>
         </div>
         <div class="report-actions" id="ftdReportActions" style="display: none;">
-            <button type="button" class="btn btn-success" id="btnDownloadFtdPDF">Download PDF Report</button>
+            <button type="button" class="btn btn-black" id="btnDownloadFtdPDF">Download PDF Report</button>
         </div>
         <div class="table-responsive">
             <div id="ftdReportContainer"></div>
@@ -527,7 +559,10 @@
         let currentFtdReportData = null;
         let currentTransportReportData = null;
         
+        // Load data from localStorage when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            loadFromLocalStorage();
+            
             // Initialize vehicle dropdown
             const vehicleDropdown = document.getElementById('vehicleDropdown');
             vehicleNumbers.forEach(vehicle => {
@@ -598,6 +633,9 @@
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addVehicleModal'));
                     modal.hide();
                     document.getElementById('newVehicleNo').value = '';
+                    
+                    // Save updated vehicle list to localStorage
+                    saveToLocalStorage('vehicleNumbers', vehicleNumbers);
                 } else if (vehicleNumbers.includes(newVehicleNo)) {
                     alert("This vehicle number already exists in the list.");
                 } else {
@@ -625,6 +663,9 @@
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addClientModal'));
                     modal.hide();
                     document.getElementById('newClientName').value = '';
+                    
+                    // Save updated client list to localStorage
+                    saveToLocalStorage('clientNames', clientNames);
                 } else if (clientNames.includes(newClientName)) {
                     alert("This client name already exists in the list.");
                 } else {
@@ -650,7 +691,59 @@
             
             // Export to Excel button
             document.getElementById('btnExportExcel').addEventListener('click', exportToExcel);
+            
+            // Clear storage button
+            document.getElementById('btnClearStorage').addEventListener('click', function() {
+                if (confirm("Are you sure you want to clear all data? This action cannot be undone.")) {
+                    clearLocalStorage();
+                    alert("All data has been cleared.");
+                }
+            });
+            
+            // Update selected date display
+            document.getElementById('ftdReportDate').addEventListener('change', function() {
+                document.getElementById('selectedDateDisplay').textContent = formatDate(this.value);
+            });
+            
+            // Initialize selected date display
+            document.getElementById('selectedDateDisplay').textContent = formatDate(today);
         });
+        
+        // Local Storage Functions
+        function saveToLocalStorage(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+        
+        function loadFromLocalStorage() {
+            // Load records
+            const storedRecords = localStorage.getItem('allRecords');
+            if (storedRecords) {
+                allRecords = JSON.parse(storedRecords);
+                recordIdCounter = allRecords.length > 0 ? Math.max(...allRecords.map(r => r.id)) + 1 : 1;
+                updateRecordsTable();
+            }
+            
+            // Load vehicle numbers
+            const storedVehicles = localStorage.getItem('vehicleNumbers');
+            if (storedVehicles) {
+                vehicleNumbers = JSON.parse(storedVehicles);
+            }
+            
+            // Load client names
+            const storedClients = localStorage.getItem('clientNames');
+            if (storedClients) {
+                clientNames = JSON.parse(storedClients);
+            }
+        }
+        
+        function clearLocalStorage() {
+            localStorage.removeItem('allRecords');
+            localStorage.removeItem('vehicleNumbers');
+            localStorage.removeItem('clientNames');
+            allRecords = [];
+            recordIdCounter = 1;
+            updateRecordsTable();
+        }
         
         function calculateValues() {
             const grossWt = parseFloat(document.getElementById('grossWt').value) || 0;
@@ -712,6 +805,10 @@
             };
             
             allRecords.push(record);
+            
+            // Save to localStorage
+            saveToLocalStorage('allRecords', allRecords);
+            
             updateRecordsTable();
             document.getElementById('weighmentForm').reset();
             
@@ -768,6 +865,10 @@
                 actionsCell.innerHTML = '<button class="btn btn-sm btn-info me-1">View</button><button class="btn btn-sm btn-danger">Delete</button>';
                 actionsCell.querySelector('.btn-danger').addEventListener('click', function() {
                     allRecords = allRecords.filter(r => r.id !== record.id);
+                    
+                    // Update localStorage after deletion
+                    saveToLocalStorage('allRecords', allRecords);
+                    
                     updateRecordsTable();
                 });
             });
@@ -891,49 +992,113 @@
                 return;
             }
             
-            const vehicleData = {};
+            // Group by month and vehicle
+            const monthData = {};
             
             dateRecords.forEach(record => {
-                if (!vehicleData[record.vehicleNo]) {
-                    vehicleData[record.vehicleNo] = {
+                const date = new Date(record.date);
+                const monthYear = `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
+                
+                if (!monthData[monthYear]) {
+                    monthData[monthYear] = {};
+                }
+                
+                if (!monthData[monthYear][record.vehicleNo]) {
+                    monthData[monthYear][record.vehicleNo] = {
                         totalTrips: 0,
                         totalNetWt: 0,
+                        totalTransportAmount: 0,
                         transactions: []
                     };
                 }
                 
-                vehicleData[record.vehicleNo].totalTrips += 1;
-                vehicleData[record.vehicleNo].totalNetWt += record.netWt;
-                vehicleData[record.vehicleNo].transactions.push({
+                monthData[monthYear][record.vehicleNo].totalTrips += 1;
+                monthData[monthYear][record.vehicleNo].totalNetWt += record.netWt;
+                monthData[monthYear][record.vehicleNo].totalTransportAmount += record.transportAmount;
+                monthData[monthYear][record.vehicleNo].transactions.push({
+                    date: record.date,
                     weighmentSlipNo: record.weighmentSlipNo,
                     clientDetails: record.clientDetails,
                     materialType: record.materialType,
                     netWt: record.netWt,
-                    date: record.date
+                    transportRate: record.transportRate,
+                    transportAmount: record.transportAmount
                 });
             });
             
-            currentFtdReportData = { date: reportDate, shift: reportShift, vehicleData };
+            currentFtdReportData = { date: reportDate, shift: reportShift, monthData };
             document.getElementById('ftdReportActions').style.display = 'block';
             
-            let reportHTML = '<table class="table table-bordered">';
-            const formattedDate = formatDate(reportDate);
-            reportHTML += `<tr class="shift-header"><th colspan="5">${reportShift === "ALL" ? "FULL DAY" : reportShift} - FTD Report - ${formattedDate}</th></tr>`;
-            reportHTML += '<tr class="customer-header"><th>Vehicle No</th><th>Total Trips</th><th>Total NET WT (MT)</th><th>Transaction Details</th></tr>';
+            let reportHTML = '';
             
-            for (const vehicle in vehicleData) {
-                reportHTML += `<tr>
-                    <td style="background-color: #d8bfd8; font-weight: bold;">${vehicle}</td>
-                    <td class="number-cell">${vehicleData[vehicle].totalTrips}</td>
-                    <td class="number-cell">${vehicleData[vehicle].totalNetWt.toFixed(2)}</td>
-                    <td class="transaction-details">`;
-                vehicleData[vehicle].transactions.forEach(tx => {
-                    reportHTML += `<div class="transaction-row">Slip No: ${tx.weighmentSlipNo}, Client: ${tx.clientDetails}, Material: ${tx.materialType}, Net WT: ${tx.netWt.toFixed(2)}</div>`;
-                });
-                reportHTML += `</td></tr>`;
+            // Calculate overall totals
+            let overallTotalTrips = 0;
+            let overallTotalNetWt = 0;
+            let overallTotalTransportAmount = 0;
+            
+            for (const monthYear in monthData) {
+                reportHTML += `<div class="month-header">${monthYear}</div>`;
+                reportHTML += '<table class="table table-bordered">';
+                reportHTML += '<tr class="customer-header"><th>Vehicle No</th><th>Total Trips</th><th>Total NET WT (MT)</th><th>Total Transport Amount</th><th>Transaction Details</th></tr>';
+                
+                // Calculate month totals
+                let monthTotalTrips = 0;
+                let monthTotalNetWt = 0;
+                let monthTotalTransportAmount = 0;
+                
+                for (const vehicle in monthData[monthYear]) {
+                    const vehicleData = monthData[monthYear][vehicle];
+                    monthTotalTrips += vehicleData.totalTrips;
+                    monthTotalNetWt += vehicleData.totalNetWt;
+                    monthTotalTransportAmount += vehicleData.totalTransportAmount;
+                    
+                    reportHTML += `<tr class="vehicle-row">
+                        <td style="font-weight: bold;">${vehicle}</td>
+                        <td class="number-cell">${vehicleData.totalTrips}</td>
+                        <td class="number-cell">${vehicleData.totalNetWt.toFixed(2)}</td>
+                        <td class="number-cell">${vehicleData.totalTransportAmount.toFixed(2)}</td>
+                        <td class="transaction-details">`;
+                    
+                    vehicleData.transactions.forEach(tx => {
+                        reportHTML += `<div class="transaction-row">
+                            Date: ${formatDate(tx.date)}, Slip No: ${tx.weighmentSlipNo}, 
+                            Client: ${tx.clientDetails}, Material: ${tx.materialType}, 
+                            Net WT: ${tx.netWt.toFixed(2)} MT, Rate: ${tx.transportRate.toFixed(2)}, 
+                            Amount: ${tx.transportAmount.toFixed(2)}
+                        </div>`;
+                    });
+                    
+                    reportHTML += `</td></tr>`;
+                }
+                
+                // Add month totals
+                reportHTML += `<tr class="month-total">
+                    <td>${monthYear} TOTAL</td>
+                    <td class="number-cell">${monthTotalTrips}</td>
+                    <td class="number-cell">${monthTotalNetWt.toFixed(2)}</td>
+                    <td class="number-cell">${monthTotalTransportAmount.toFixed(2)}</td>
+                    <td></td>
+                </tr>`;
+                
+                reportHTML += '</table>';
+                
+                // Add to overall totals
+                overallTotalTrips += monthTotalTrips;
+                overallTotalNetWt += monthTotalNetWt;
+                overallTotalTransportAmount += monthTotalTransportAmount;
             }
             
-            reportHTML += '</table>';
+            // Add grand total
+            reportHTML += `<table class="table table-bordered">`;
+            reportHTML += `<tr class="grand-total">
+                <td>GRAND TOTAL</td>
+                <td class="number-cell">${overallTotalTrips}</td>
+                <td class="number-cell">${overallTotalNetWt.toFixed(2)}</td>
+                <td class="number-cell">${overallTotalTransportAmount.toFixed(2)}</td>
+                <td></td>
+            </tr>`;
+            reportHTML += `</table>`;
+            
             document.getElementById('ftdReportContainer').innerHTML = reportHTML;
         }
         
@@ -1080,29 +1245,57 @@
             
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            const { date, shift, vehicleData } = currentFtdReportData;
+            const { date, shift, monthData } = currentFtdReportData;
             
             doc.setFontSize(14);
             doc.text(`${shift === "ALL" ? "FULL DAY" : shift} - FTD Report - ${formatDate(date)}`, 14, 20);
             
-            const tableData = [];
+            let startY = 30;
             
-            for (const vehicle in vehicleData) {
-                const transactions = vehicleData[vehicle].transactions.map(tx =>
-                    `Slip No: ${tx.weighmentSlipNo}, Client: ${tx.clientDetails}, Material: ${tx.materialType}, Net WT: ${tx.netWt.toFixed(2)}`
-                ).join('\n');
+            for (const monthYear in monthData) {
+                doc.setFontSize(12);
+                doc.text(monthYear, 14, startY);
+                startY += 10;
                 
-                tableData.push([vehicle, vehicleData[vehicle].totalTrips, vehicleData[vehicle].totalNetWt.toFixed(2), transactions]);
+                const tableData = [];
+                let monthTotalTrips = 0;
+                let monthTotalNetWt = 0;
+                let monthTotalTransportAmount = 0;
+                
+                for (const vehicle in monthData[monthYear]) {
+                    const vehicleData = monthData[monthYear][vehicle];
+                    monthTotalTrips += vehicleData.totalTrips;
+                    monthTotalNetWt += vehicleData.totalNetWt;
+                    monthTotalTransportAmount += vehicleData.totalTransportAmount;
+                    
+                    const transactions = vehicleData.transactions.map(tx =>
+                        `Date: ${formatDate(tx.date)}, Slip: ${tx.weighmentSlipNo}, Client: ${tx.clientDetails}, Material: ${tx.materialType}, Net WT: ${tx.netWt.toFixed(2)} MT, Rate: ${tx.transportRate.toFixed(2)}, Amount: ${tx.transportAmount.toFixed(2)}`
+                    ).join('\n');
+                    
+                    tableData.push([vehicle, vehicleData.totalTrips, vehicleData.totalNetWt.toFixed(2), vehicleData.totalTransportAmount.toFixed(2), transactions]);
+                }
+                
+                doc.autoTable({
+                    head: [['Vehicle No', 'Total Trips', 'Total NET WT (MT)', 'Total Transport Amount', 'Transaction Details']],
+                    body: tableData,
+                    startY: startY,
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [44, 62, 80] },
+                    alternateRowStyles: { fillColor: [240, 240, 240] }
+                });
+                
+                startY = doc.lastAutoTable.finalY + 15;
+                
+                // Add month total
+                doc.autoTable({
+                    body: [[monthYear + ' TOTAL', monthTotalTrips, monthTotalNetWt.toFixed(2), monthTotalTransportAmount.toFixed(2), '']],
+                    startY: startY,
+                    styles: { fontSize: 8, fillColor: [230, 247, 255] },
+                    headStyles: { fillColor: [44, 62, 80] }
+                });
+                
+                startY = doc.lastAutoTable.finalY + 15;
             }
-            
-            doc.autoTable({
-                head: [['Vehicle No', 'Total Trips', 'Total NET WT (MT)', 'Transaction Details']],
-                body: tableData,
-                startY: 30,
-                styles: { fontSize: 8 },
-                headStyles: { fillColor: [44, 62, 80] },
-                alternateRowStyles: { fillColor: [240, 240, 240] }
-            });
             
             doc.save(`FTD_Report_${date}_${shift}.pdf`);
         }
