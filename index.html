@@ -301,6 +301,13 @@
                     <label for="advanceReceived" class="form-label">Advance Received</label>
                     <input type="number" class="form-control" id="advanceReceived" step="0.01">
                 </div>
+                <div class="col-md-4">
+                    <label for="transportType" class="form-label">Transport Type</label>
+                    <select class="form-select" id="transportType">
+                        <option value="SGX Transport">SGX Transport</option>
+                        <option value="Customer Transport">Customer Transport</option>
+                    </select>
+                </div>
             </div>
             <!-- Vehicle Information -->
             <div class="row mb-4">
@@ -408,12 +415,14 @@
                         <th>S.NO</th>
                         <th>Accounting Date</th>
                         <th>Date</th>
+                        <th>Shift</th>
                         <th>Weighment Slip No</th>
                         <th>DC No</th>
                         <th>Royalty Permit No</th>
                         <th>Permit Qty (CM)</th>
                         <th>Client Details</th>
                         <th>Payment Terms</th>
+                        <th>Transport Type</th>
                         <th>Vehicle No</th>
                         <th>Material</th>
                         <th>Gross WT</th>
@@ -435,7 +444,7 @@
                 </thead>
                 <tbody id="recordsTable">
                     <tr>
-                        <td colspan="26" class="text-center">No records found</td>
+                        <td colspan="28" class="text-center">No records found</td>
                     </tr>
                 </tbody>
             </table>
@@ -466,6 +475,7 @@
         </div>
         <div class="report-actions" id="dispatchReportActions" style="display: none;">
             <button type="button" class="btn btn-success" id="btnDownloadDispatchPDF">Download PDF Report</button>
+            <button type="button" class="btn btn-primary" id="btnDownloadDispatchExcel">Download Excel Report</button>
         </div>
         <div class="table-responsive">
             <div id="dispatchReportContainer"></div>
@@ -480,9 +490,9 @@
             <div class="col-md-3">
                 <label for="ftdReportShift" class="form-label">Select Shift</label>
                 <select class="form-select" id="ftdReportShift">
-                    <option value="DAY">DAY</option>
-                    <option value="NIGHT">NIGHT</option>
-                    <option value="FULL DAY">FULL DAY</option>
+                    <option value="A-SHIFT">A-SHIFT (Day)</option>
+                    <option value="B-SHIFT">B-SHIFT (Night)</option>
+                    <option value="ALL">FULL DAY</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -495,6 +505,7 @@
         </div>
         <div class="report-actions" id="ftdReportActions" style="display: none;">
             <button type="button" class="btn btn-black" id="btnDownloadFtdPDF">Download PDF Report</button>
+            <button type="button" class="btn btn-success" id="btnDownloadFtdExcel">Download Excel Report</button>
         </div>
         <div class="table-responsive">
             <div id="ftdReportContainer"></div>
@@ -521,6 +532,7 @@
         </div>
         <div class="report-actions" id="transportReportActions" style="display: none;">
             <button type="button" class="btn btn-success" id="btnDownloadTransportPDF">Download PDF Report</button>
+            <button type="button" class="btn btn-primary" id="btnDownloadTransportExcel">Download Excel Report</button>
         </div>
         <div class="table-responsive">
             <table class="table table-bordered report-table" id="transportBillTable">
@@ -530,6 +542,48 @@
                         <th>Total Trips</th>
                         <th>Total NET WT (MT)</th>
                         <th>Total Transport Amount</th>
+                        <th>Transaction Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5" class="text-center">No report generated yet</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Client Wise Dispatch Bill Report -->
+        <div class="section-header">Client Wise Dispatch Bill Report</div>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label class="form-label">Select Date Range</label>
+                <div class="input-group">
+                    <input type="date" class="form-control" id="clientBillStartDate">
+                    <span class="input-group-text">to</span>
+                    <input type="date" class="form-control" id="clientBillEndDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="clientBillClient" class="form-label">Client (Optional)</label>
+                <input type="text" class="form-control" id="clientBillClient" placeholder="Leave blank for all clients">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-primary form-control" id="btnClientBill">Generate Client Bill</button>
+            </div>
+        </div>
+        <div class="report-actions" id="clientReportActions" style="display: none;">
+            <button type="button" class="btn btn-success" id="btnDownloadClientPDF">Download PDF Report</button>
+            <button type="button" class="btn btn-primary" id="btnDownloadClientExcel">Download Excel Report</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered report-table" id="clientBillTable">
+                <thead>
+                    <tr>
+                        <th>Client Details</th>
+                        <th>Total Trips</th>
+                        <th>Total NET WT (MT)</th>
+                        <th>Total Sale Amount</th>
                         <th>Transaction Details</th>
                     </tr>
                 </thead>
@@ -607,6 +661,7 @@
         let currentDispatchReportData = null;
         let currentFtdReportData = null;
         let currentTransportReportData = null;
+        let currentClientReportData = null;
         
         // Load data from localStorage when page loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -638,6 +693,8 @@
             document.getElementById('ftdReportDate').value = today;
             document.getElementById('transportBillStartDate').value = today;
             document.getElementById('transportBillEndDate').value = today;
+            document.getElementById('clientBillStartDate').value = today;
+            document.getElementById('clientBillEndDate').value = today;
             
             // Event listeners for calculations
             document.getElementById('grossWt').addEventListener('input', calculateValues);
@@ -726,11 +783,19 @@
             document.getElementById('btnDispatchReport').addEventListener('click', generateDispatchReport);
             document.getElementById('btnFtdReport').addEventListener('click', generateFtdReport);
             document.getElementById('btnTransportBill').addEventListener('click', generateTransportBill);
+            document.getElementById('btnClientBill').addEventListener('click', generateClientBill);
             
             // PDF download buttons
             document.getElementById('btnDownloadDispatchPDF').addEventListener('click', downloadDispatchPDF);
             document.getElementById('btnDownloadFtdPDF').addEventListener('click', downloadFtdPDF);
             document.getElementById('btnDownloadTransportPDF').addEventListener('click', downloadTransportPDF);
+            document.getElementById('btnDownloadClientPDF').addEventListener('click', downloadClientPDF);
+            
+            // Excel download buttons
+            document.getElementById('btnDownloadDispatchExcel').addEventListener('click', downloadDispatchExcel);
+            document.getElementById('btnDownloadFtdExcel').addEventListener('click', downloadFtdExcel);
+            document.getElementById('btnDownloadTransportExcel').addEventListener('click', downloadTransportExcel);
+            document.getElementById('btnDownloadClientExcel').addEventListener('click', downloadClientExcel);
             
             // Form submission
             document.getElementById('weighmentForm').addEventListener('submit', function(e) {
@@ -836,6 +901,7 @@
                 royaltyRate: parseFloat(document.getElementById('royaltyRate').value) || 0,
                 clientDetails: document.getElementById('clientDetails').value,
                 paymentMode: document.getElementById('paymentMode').value,
+                transportType: document.getElementById('transportType').value,
                 vehicleNo: document.getElementById('vehicleNo').value,
                 materialType: document.getElementById('materialType').value,
                 transportRate: parseFloat(document.getElementById('transportRate').value) || 0,
@@ -866,6 +932,9 @@
             document.getElementById('accountingDate').value = today;
             document.getElementById('date').value = today;
             
+            // Set transport type to default value
+            document.getElementById('transportType').value = "SGX Transport";
+            
             alert("Record added successfully!");
         }
         
@@ -877,7 +946,7 @@
                 const row = tableBody.insertRow();
                 const cell = row.insertCell(0);
                 cell.textContent = 'No records found';
-                cell.colSpan = 26;
+                cell.colSpan = 28;
                 cell.className = 'text-center';
                 return;
             }
@@ -887,30 +956,32 @@
                 row.insertCell(0).textContent = index + 1;
                 row.insertCell(1).textContent = record.accountingDate;
                 row.insertCell(2).textContent = record.date;
-                row.insertCell(3).textContent = record.weighmentSlipNo;
-                row.insertCell(4).textContent = record.deliveryChallanNo;
-                row.insertCell(5).textContent = record.royaltyPermitNo;
-                row.insertCell(6).textContent = record.permitQty.toFixed(2);
-                row.insertCell(7).textContent = record.clientDetails;
-                row.insertCell(8).textContent = record.paymentMode;
-                row.insertCell(9).textContent = record.vehicleNo;
-                row.insertCell(10).textContent = record.materialType;
-                row.insertCell(11).textContent = record.grossWt.toFixed(2);
-                row.insertCell(12).textContent = record.tareWt.toFixed(2);
-                row.insertCell(13).textContent = record.netWt.toFixed(2);
-                row.insertCell(14).textContent = record.ratePerTone.toFixed(2);
-                row.insertCell(15).textContent = record.saleAmount.toFixed(2);
-                row.insertCell(16).textContent = record.cashReceived.toFixed(2);
-                row.insertCell(17).textContent = record.advanceReceived.toFixed(2);
-                row.insertCell(18).textContent = record.customerBalance.toFixed(2);
-                row.insertCell(19).textContent = record.remarks;
-                row.insertCell(20).textContent = record.royaltyRate.toFixed(2);
-                row.insertCell(21).textContent = record.royaltyAmount.toFixed(2);
-                row.insertCell(22).textContent = record.transportRate.toFixed(2);
-                row.insertCell(23).textContent = record.transportAmount.toFixed(2);
-                row.insertCell(24).textContent = record.totalAmount.toFixed(2);
+                row.insertCell(3).textContent = record.shift;
+                row.insertCell(4).textContent = record.weighmentSlipNo;
+                row.insertCell(5).textContent = record.deliveryChallanNo;
+                row.insertCell(6).textContent = record.royaltyPermitNo;
+                row.insertCell(7).textContent = record.permitQty.toFixed(2);
+                row.insertCell(8).textContent = record.clientDetails;
+                row.insertCell(9).textContent = record.paymentMode;
+                row.insertCell(10).textContent = record.transportType;
+                row.insertCell(11).textContent = record.vehicleNo;
+                row.insertCell(12).textContent = record.materialType;
+                row.insertCell(13).textContent = record.grossWt.toFixed(2);
+                row.insertCell(14).textContent = record.tareWt.toFixed(2);
+                row.insertCell(15).textContent = record.netWt.toFixed(2);
+                row.insertCell(16).textContent = record.ratePerTone.toFixed(2);
+                row.insertCell(17).textContent = record.saleAmount.toFixed(2);
+                row.insertCell(18).textContent = record.cashReceived.toFixed(2);
+                row.insertCell(19).textContent = record.advanceReceived.toFixed(2);
+                row.insertCell(20).textContent = record.customerBalance.toFixed(2);
+                row.insertCell(21).textContent = record.remarks;
+                row.insertCell(22).textContent = record.royaltyRate.toFixed(2);
+                row.insertCell(23).textContent = record.royaltyAmount.toFixed(2);
+                row.insertCell(24).textContent = record.transportRate.toFixed(2);
+                row.insertCell(25).textContent = record.transportAmount.toFixed(2);
+                row.insertCell(26).textContent = record.totalAmount.toFixed(2);
                 
-                const actionsCell = row.insertCell(25);
+                const actionsCell = row.insertCell(27);
                 actionsCell.innerHTML = '<button class="btn btn-sm btn-info me-1">View</button><button class="btn btn-sm btn-danger">Delete</button>';
                 actionsCell.querySelector('.btn-danger').addEventListener('click', function() {
                     allRecords = allRecords.filter(r => r.id !== record.id);
@@ -926,6 +997,11 @@
         function formatDate(dateStr) {
             const date = new Date(dateStr);
             return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function getMonthYear(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
         }
         
         function generateDispatchReport() {
@@ -1031,11 +1107,8 @@
                 return;
             }
             
-            let dateRecords = reportShift === "FULL DAY" ?
-                allRecords.filter(record => record.date === reportDate) :
-                allRecords.filter(record => record.date === reportDate && 
-                    ((reportShift === "DAY" && record.shift === "A-SHIFT") || 
-                     (reportShift === "NIGHT" && record.shift === "B-SHIFT")));
+            // Get records for the selected date
+            let dateRecords = allRecords.filter(record => record.date === reportDate);
             
             if (dateRecords.length === 0) {
                 alert("No records found for the selected criteria.");
@@ -1043,35 +1116,37 @@
                 return;
             }
             
-            // Group by customer and material
-            const customerData = {};
+            // Separate day and night shifts
+            const dayRecords = dateRecords.filter(record => record.shift === "A-SHIFT");
+            const nightRecords = dateRecords.filter(record => record.shift === "B-SHIFT");
+            
             const materialTypes = ["10 MM", "20 MM", "V/SAND", "Scalping", "P/Sand", "40MM", "GSB/WET MIX", "R/Sand"];
             
-            dateRecords.forEach(record => {
-                if (!customerData[record.clientDetails]) {
-                    customerData[record.clientDetails] = {
+            // Build dayCustomerData
+            const dayCustomerData = {};
+            dayRecords.forEach(record => {
+                if (!dayCustomerData[record.clientDetails]) {
+                    dayCustomerData[record.clientDetails] = {
                         totalTonnage: 0,
                         totalTrips: 0,
                         materials: {},
                         transactions: []
                     };
                     materialTypes.forEach(material => {
-                        customerData[record.clientDetails].materials[material] = { tonnage: 0, trips: 0 };
+                        dayCustomerData[record.clientDetails].materials[material] = { tonnage: 0, trips: 0 };
                     });
                 }
                 
-                customerData[record.clientDetails].totalTonnage += record.netWt;
-                customerData[record.clientDetails].totalTrips += 1;
+                dayCustomerData[record.clientDetails].totalTonnage += record.netWt;
+                dayCustomerData[record.clientDetails].totalTrips += 1;
                 
-                if (customerData[record.clientDetails].materials[record.materialType]) {
-                    customerData[record.clientDetails].materials[record.materialType].tonnage += record.netWt;
-                    customerData[record.clientDetails].materials[record.materialType].trips += 1;
+                if (dayCustomerData[record.clientDetails].materials[record.materialType]) {
+                    dayCustomerData[record.clientDetails].materials[record.materialType].tonnage += record.netWt;
+                    dayCustomerData[record.clientDetails].materials[record.materialType].trips += 1;
                 }
                 
-                // Add transaction details
-                customerData[record.clientDetails].transactions.push({
+                dayCustomerData[record.clientDetails].transactions.push({
                     date: record.date,
-                    slipNo: record.weighmentSlipNo,
                     client: record.clientDetails,
                     material: record.materialType,
                     netWt: record.netWt,
@@ -1080,26 +1155,58 @@
                 });
             });
             
-            currentFtdReportData = { date: reportDate, shift: reportShift, customerData, materialTypes };
+            // Build nightCustomerData
+            const nightCustomerData = {};
+            nightRecords.forEach(record => {
+                if (!nightCustomerData[record.clientDetails]) {
+                    nightCustomerData[record.clientDetails] = {
+                        totalTonnage: 0,
+                        totalTrips: 0,
+                        materials: {},
+                        transactions: []
+                    };
+                    materialTypes.forEach(material => {
+                        nightCustomerData[record.clientDetails].materials[material] = { tonnage: 0, trips: 0 };
+                    });
+                }
+                
+                nightCustomerData[record.clientDetails].totalTonnage += record.netWt;
+                nightCustomerData[record.clientDetails].totalTrips += 1;
+                
+                if (nightCustomerData[record.clientDetails].materials[record.materialType]) {
+                    nightCustomerData[record.clientDetails].materials[record.materialType].tonnage += record.netWt;
+                    nightCustomerData[record.clientDetails].materials[record.materialType].trips += 1;
+                }
+                
+                nightCustomerData[record.clientDetails].transactions.push({
+                    date: record.date,
+                    client: record.clientDetails,
+                    material: record.materialType,
+                    netWt: record.netWt,
+                    rate: record.ratePerTone,
+                    amount: record.saleAmount
+                });
+            });
+            
+            currentFtdReportData = { 
+                date: reportDate, 
+                shift: reportShift, 
+                materialTypes,
+                dayRecords,
+                nightRecords,
+                dayCustomerData,
+                nightCustomerData
+            };
             document.getElementById('ftdReportActions').style.display = 'block';
             
             let reportHTML = '';
             const formattedDate = formatDate(reportDate);
             
-            // Calculate totals
+            // Calculate totals for day and night shifts
             let dayTotalTonnage = 0;
             let dayTotalTrips = 0;
             const dayMaterialTotals = {};
             materialTypes.forEach(material => dayMaterialTotals[material] = { tonnage: 0, trips: 0 });
-            
-            let nightTotalTonnage = 0;
-            let nightTotalTrips = 0;
-            const nightMaterialTotals = {};
-            materialTypes.forEach(material => nightMaterialTotals[material] = { tonnage: 0, trips: 0 });
-            
-            // Separate day and night shifts
-            const dayRecords = allRecords.filter(record => record.date === reportDate && record.shift === "A-SHIFT");
-            const nightRecords = allRecords.filter(record => record.date === reportDate && record.shift === "B-SHIFT");
             
             dayRecords.forEach(record => {
                 dayTotalTonnage += record.netWt;
@@ -1109,6 +1216,11 @@
                     dayMaterialTotals[record.materialType].trips += 1;
                 }
             });
+            
+            let nightTotalTonnage = 0;
+            let nightTotalTrips = 0;
+            const nightMaterialTotals = {};
+            materialTypes.forEach(material => nightMaterialTotals[material] = { tonnage: 0, trips: 0 });
             
             nightRecords.forEach(record => {
                 nightTotalTonnage += record.netWt;
@@ -1134,7 +1246,8 @@
             let totalCashSale = 0;
             let totalCreditSale = 0;
             
-            dateRecords.forEach(record => {
+            const filteredRecords = reportShift === "ALL" ? dateRecords : reportShift === "A-SHIFT" ? dayRecords : nightRecords;
+            filteredRecords.forEach(record => {
                 if (record.paymentMode === "Cash") {
                     totalCashSale += record.saleAmount;
                 } else if (record.paymentMode === "Credit") {
@@ -1143,66 +1256,64 @@
             });
             
             // Generate report based on selected shift
-            if (reportShift === "DAY" || reportShift === "FULL DAY") {
+            if (reportShift === "A-SHIFT" || reportShift === "ALL") {
                 reportHTML += `<div class="section-header">A-SHIFT (Day Shift) – Dispatch Vehicle Wise Planning</div>`;
                 reportHTML += `<table class="ftd-report-table">`;
-                reportHTML += `<thead><tr><th>Customer Name</th><th>Unit</th>`;
+                reportHTML += `<thead><tr><th>Customer Name</th>`;
                 materialTypes.forEach(material => reportHTML += `<th>${material}</th>`);
                 reportHTML += `<th>TOTAL</th></tr></thead><tbody>`;
                 
                 // Add day shift customer data
-                for (const customer in customerData) {
-                    const hasDayRecords = dayRecords.some(record => record.clientDetails === customer);
-                    if (hasDayRecords) {
-                        reportHTML += `<tr class="ftd-customer-row"><td>${customer}</td><td>No. of Vehicles / Total Tonnage MT</td>`;
-                        materialTypes.forEach(material => {
-                            const tonnage = customerData[customer].materials[material].tonnage;
-                            reportHTML += `<td>${tonnage > 0 ? tonnage.toFixed(2) : ''}</td>`;
-                        });
-                        reportHTML += `<td>${customerData[customer].totalTonnage.toFixed(2)}</td></tr>`;
-                    }
+                for (const customer in dayCustomerData) {
+                    reportHTML += `<tr class="ftd-customer-row"><td>${customer}</td>`;
+                    materialTypes.forEach(material => {
+                        const tonnage = dayCustomerData[customer].materials[material].tonnage;
+                        reportHTML += `<td>${tonnage > 0 ? tonnage.toFixed(2) : ''}</td>`;
+                    });
+                    reportHTML += `<td>${dayCustomerData[customer].totalTonnage.toFixed(2)}</td></tr>`;
                 }
                 
-                // Add day shift totals
-                reportHTML += `<tr class="ftd-total-row"><td colspan="2">Total No of Vehicles: ${dayTotalTrips}</td>`;
-                materialTypes.forEach(material => {
-                    reportHTML += `<td>${dayMaterialTotals[material]?.tonnage > 0 ? dayMaterialTotals[material].tonnage.toFixed(2) : ''}</td>`;
-                });
-                reportHTML += `<td>${dayTotalTonnage.toFixed(2)}</td></tr>`;
+                // Add day shift totals if not ALL
+                if (reportShift === "A-SHIFT") {
+                    reportHTML += `<tr class="ftd-total-row"><td>Total No of Vehicles: ${dayTotalTrips}</td>`;
+                    materialTypes.forEach(material => {
+                        reportHTML += `<td>${dayMaterialTotals[material]?.tonnage > 0 ? dayMaterialTotals[material].tonnage.toFixed(2) : ''}</td>`;
+                    });
+                    reportHTML += `<td>${dayTotalTonnage.toFixed(2)}</td></tr>`;
+                }
                 reportHTML += `</tbody></table>`;
             }
             
-            if (reportShift === "NIGHT" || reportShift === "FULL DAY") {
+            if (reportShift === "B-SHIFT" || reportShift === "ALL") {
                 reportHTML += `<div class="section-header">B-SHIFT (Night Shift) – Dispatch Vehicle Wise Planning</div>`;
                 reportHTML += `<table class="ftd-report-table">`;
-                reportHTML += `<thead><tr><th>Customer Name</th><th>Unit</th>`;
+                reportHTML += `<thead><tr><th>Customer Name</th>`;
                 materialTypes.forEach(material => reportHTML += `<th>${material}</th>`);
                 reportHTML += `<th>TOTAL</th></tr></thead><tbody>`;
                 
                 // Add night shift customer data
-                for (const customer in customerData) {
-                    const hasNightRecords = nightRecords.some(record => record.clientDetails === customer);
-                    if (hasNightRecords) {
-                        reportHTML += `<tr class="ftd-customer-row"><td>${customer}</td><td>No. of Vehicles / Total Tonnage MT</td>`;
-                        materialTypes.forEach(material => {
-                            const tonnage = customerData[customer].materials[material].tonnage;
-                            reportHTML += `<td>${tonnage > 0 ? tonnage.toFixed(2) : ''}</td>`;
-                        });
-                        reportHTML += `<td>${customerData[customer].totalTonnage.toFixed(2)}</td></tr>`;
-                    }
+                for (const customer in nightCustomerData) {
+                    reportHTML += `<tr class="ftd-customer-row"><td>${customer}</td>`;
+                    materialTypes.forEach(material => {
+                        const tonnage = nightCustomerData[customer].materials[material].tonnage;
+                        reportHTML += `<td>${tonnage > 0 ? tonnage.toFixed(2) : ''}</td>`;
+                    });
+                    reportHTML += `<td>${nightCustomerData[customer].totalTonnage.toFixed(2)}</td></tr>`;
                 }
                 
-                // Add night shift totals
-                reportHTML += `<tr class="ftd-total-row"><td colspan="2">Total No of Vehicles: ${nightTotalTrips}</td>`;
-                materialTypes.forEach(material => {
-                    reportHTML += `<td>${nightMaterialTotals[material]?.tonnage > 0 ? nightMaterialTotals[material].tonnage.toFixed(2) : ''}</td>`;
-                });
-                reportHTML += `<td>${nightTotalTonnage.toFixed(2)}</td></tr>`;
+                // Add night shift totals if not ALL
+                if (reportShift === "B-SHIFT") {
+                    reportHTML += `<tr class="ftd-total-row"><td>Total No of Vehicles: ${nightTotalTrips}</td>`;
+                    materialTypes.forEach(material => {
+                        reportHTML += `<td>${nightMaterialTotals[material]?.tonnage > 0 ? nightMaterialTotals[material].tonnage.toFixed(2) : ''}</td>`;
+                    });
+                    reportHTML += `<td>${nightTotalTonnage.toFixed(2)}</td></tr>`;
+                }
                 reportHTML += `</tbody></table>`;
             }
             
             // Add summary table for FULL DAY report
-            if (reportShift === "FULL DAY") {
+            if (reportShift === "ALL") {
                 reportHTML += `<div class="section-header">Summary</div>`;
                 reportHTML += `<table class="ftd-summary-table">`;
                 reportHTML += `<thead><tr><th>Shift</th><th>No of Vehicles</th>`;
@@ -1243,25 +1354,32 @@
                 reportHTML += `</tbody></table>`;
             }
             
-            // Add transaction details in point format
+            // Add transaction details in point format (without slip numbers)
             reportHTML += `<div class="section-header">Transaction Details</div>`;
             reportHTML += `<div class="transaction-details">`;
             
-            for (const customer in customerData) {
-                reportHTML += `<div class="transaction-points">`;
-                customerData[customer].transactions.forEach(tx => {
-                    reportHTML += `<div class="transaction-point">`;
-                    reportHTML += `Date: ${formatDate(tx.date)}, Slip No: ${tx.slipNo}, Client: ${tx.client}, Material: ${tx.material}, Net WT: ${tx.netWt.toFixed(2)} MT, Rate: ${tx.rate.toFixed(2)}, Amount: ${tx.amount.toFixed(2)}`;
-                    reportHTML += `</div>`;
-                });
-                reportHTML += `</div>`;
+            let allTransactions = [];
+            if (reportShift === "A-SHIFT" || reportShift === "ALL") {
+                Object.values(dayCustomerData).forEach(cust => allTransactions.push(...cust.transactions));
             }
+            if (reportShift === "B-SHIFT" || reportShift === "ALL") {
+                Object.values(nightCustomerData).forEach(cust => allTransactions.push(...cust.transactions));
+            }
+            
+            let transactionCounter = 1;
+            reportHTML += `<div class="transaction-points">`;
+            allTransactions.forEach(tx => {
+                reportHTML += `<div class="transaction-point">`;
+                reportHTML += `${transactionCounter++}. Date: ${formatDate(tx.date)}, Client: ${tx.client}, Material: ${tx.material}, Net WT: ${tx.netWt.toFixed(2)} MT, Rate: ${tx.rate.toFixed(2)}, Amount: ${tx.amount.toFixed(2)}`;
+                reportHTML += `</div>`;
+            });
+            reportHTML += `</div>`;
             
             reportHTML += `</div>`;
             
             document.getElementById('ftdReportContainer').innerHTML = reportHTML;
         }
-        
+
         function generateTransportBill() {
             const startDate = document.getElementById('transportBillStartDate').value;
             const endDate = document.getElementById('transportBillEndDate').value;
@@ -1323,9 +1441,114 @@
                 
                 const detailsCell = row.insertCell(4);
                 detailsCell.className = 'transaction-details';
+                
+                let transactionCounter = 1;
                 vehicleData[vehicle].transactions.forEach(tx => {
-                    detailsCell.innerHTML += `<div class="transaction-row">Slip No: ${tx.weighmentSlipNo}, Client: ${tx.clientDetails}, Material: ${tx.materialType}, Net WT: ${tx.netWt.toFixed(2)}, Transport Amount: ${tx.transportAmount.toFixed(2)}</div>`;
+                    detailsCell.innerHTML += `<div class="transaction-row">${transactionCounter++}. Slip No: ${tx.weighmentSlipNo}, Client: ${tx.clientDetails}, Material: ${tx.materialType}, Net WT: ${tx.netWt.toFixed(2)}, Transport Amount: ${tx.transportAmount.toFixed(2)}</div>`;
                 });
+            }
+        }
+
+        function generateClientBill() {
+            const startDate = document.getElementById('clientBillStartDate').value;
+            const endDate = document.getElementById('clientBillEndDate').value;
+            const clientDetails = document.getElementById('clientBillClient').value.trim();
+            
+            if (!startDate || !endDate) {
+                alert("Please select a date range for the report.");
+                return;
+            }
+            
+            let dateRecords = allRecords.filter(record => record.date >= startDate && record.date <= endDate);
+            if (clientDetails) {
+                dateRecords = dateRecords.filter(record => record.clientDetails === clientDetails);
+            }
+            
+            if (dateRecords.length === 0) {
+                alert("No records found for the selected criteria.");
+                document.getElementById('clientReportActions').style.display = 'none';
+                return;
+            }
+            
+            const clientData = {};
+            
+            dateRecords.forEach(record => {
+                if (!clientData[record.clientDetails]) {
+                    clientData[record.clientDetails] = {
+                        totalTrips: 0,
+                        totalNetWt: 0,
+                        totalSaleAmount: 0,
+                        transactions: []
+                    };
+                }
+                
+                clientData[record.clientDetails].totalTrips += 1;
+                clientData[record.clientDetails].totalNetWt += record.netWt;
+                clientData[record.clientDetails].totalSaleAmount += record.saleAmount;
+                clientData[record.clientDetails].transactions.push({
+                    date: record.date,
+                    weighmentSlipNo: record.weighmentSlipNo,
+                    materialType: record.materialType,
+                    netWt: record.netWt,
+                    ratePerTone: record.ratePerTone,
+                    saleAmount: record.saleAmount,
+                    vehicleNo: record.vehicleNo
+                });
+            });
+            
+            currentClientReportData = { startDate, endDate, clientDetails, clientData };
+            document.getElementById('clientReportActions').style.display = 'block';
+            
+            const tableBody = document.getElementById('clientBillTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+            
+            for (const client in clientData) {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = client;
+                row.insertCell(1).textContent = clientData[client].totalTrips;
+                row.insertCell(2).textContent = clientData[client].totalNetWt.toFixed(2);
+                row.insertCell(3).textContent = clientData[client].totalSaleAmount.toFixed(2);
+                
+                const detailsCell = row.insertCell(4);
+                detailsCell.className = 'transaction-details';
+                
+                // Sort transactions by date
+                clientData[client].transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                let currentMonth = '';
+                let monthTrips = 0;
+                let monthNetWt = 0;
+                let monthSaleAmount = 0;
+                let transactionCounter = 1;
+                
+                clientData[client].transactions.forEach(tx => {
+                    const monthYear = getMonthYear(tx.date);
+                    if (monthYear !== currentMonth) {
+                        if (currentMonth) {
+                            // Add month total
+                            detailsCell.innerHTML += `<div class="month-total transaction-row">Month Total: Trips: ${monthTrips}, Net WT: ${monthNetWt.toFixed(2)}, Sale Amount: ${monthSaleAmount.toFixed(2)}</div>`;
+                        }
+                        detailsCell.innerHTML += `<div class="month-header">${monthYear}</div>`;
+                        currentMonth = monthYear;
+                        monthTrips = 0;
+                        monthNetWt = 0;
+                        monthSaleAmount = 0;
+                    }
+                    
+                    detailsCell.innerHTML += `<div class="transaction-row vehicle-row">${transactionCounter++}. Date: ${formatDate(tx.date)}, Slip No: ${tx.weighmentSlipNo}, Material: ${tx.materialType}, Net WT: ${tx.netWt.toFixed(2)}, Rate: ${tx.ratePerTone.toFixed(2)}, Amount: ${tx.saleAmount.toFixed(2)}, Vehicle: ${tx.vehicleNo}</div>`;
+                    
+                    monthTrips += 1;
+                    monthNetWt += tx.netWt;
+                    monthSaleAmount += tx.saleAmount;
+                });
+                
+                // Add last month total
+                if (currentMonth) {
+                    detailsCell.innerHTML += `<div class="month-total transaction-row">Month Total: Trips: ${monthTrips}, Net WT: ${monthNetWt.toFixed(2)}, Sale Amount: ${monthSaleAmount.toFixed(2)}</div>`;
+                }
+                
+                // Add grand total
+                detailsCell.innerHTML += `<div class="grand-total transaction-row">Grand Total: Trips: ${clientData[client].totalTrips}, Net WT: ${clientData[client].totalNetWt.toFixed(2)}, Sale Amount: ${clientData[client].totalSaleAmount.toFixed(2)}</div>`;
             }
         }
         
@@ -1405,57 +1628,62 @@
             
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            const { date, shift, customerData, materialTypes } = currentFtdReportData;
+            const { date, shift, materialTypes, dayCustomerData, nightCustomerData } = currentFtdReportData;
             
             doc.setFontSize(14);
             doc.text(`FTD Report - ${shift} - ${formatDate(date)}`, 14, 20);
             
-            // Add content based on shift selection
-            if (shift === "DAY" || shift === "FULL DAY") {
-                doc.text("A-SHIFT (Day Shift) – Dispatch Vehicle Wise Planning", 14, 30);
+            let currentY = 30;
+            
+            // Add day shift if applicable
+            if (shift === "A-SHIFT" || shift === "ALL") {
+                doc.text("A-SHIFT (Day Shift) – Dispatch Vehicle Wise Planning", 14, currentY);
+                currentY += 10;
                 
                 const dayTableData = [];
-                for (const customer in customerData) {
-                    const row = [customer, 'No. of Vehicles / Total Tonnage MT'];
+                for (const customer in dayCustomerData) {
+                    const row = [customer];
                     materialTypes.forEach(material => {
-                        row.push(customerData[customer].materials[material].tonnage > 0 ? customerData[customer].materials[material].tonnage.toFixed(2) : '');
+                        row.push(dayCustomerData[customer].materials[material].tonnage > 0 ? dayCustomerData[customer].materials[material].tonnage.toFixed(2) : '');
                     });
-                    row.push(customerData[customer].totalTonnage.toFixed(2));
+                    row.push(dayCustomerData[customer].totalTonnage.toFixed(2));
                     dayTableData.push(row);
                 }
                 
                 doc.autoTable({
-                    head: [['Customer Name', 'Unit', ...materialTypes, 'TOTAL']],
+                    head: [['Customer Name', ...materialTypes, 'TOTAL']],
                     body: dayTableData,
-                    startY: 40,
+                    startY: currentY,
                     styles: { fontSize: 8 },
                     headStyles: { fillColor: [44, 62, 80] },
                     alternateRowStyles: { fillColor: [240, 240, 240] }
                 });
+                currentY = doc.lastAutoTable.finalY + 20;
             }
             
-            if (shift === "NIGHT" || shift === "FULL DAY") {
-                const startY = shift === "FULL DAY" ? doc.lastAutoTable.finalY + 20 : 40;
-                if (shift === "FULL DAY") {
+            // Add night shift if applicable
+            if (shift === "B-SHIFT" || shift === "ALL") {
+                if (currentY > 30 && shift === "ALL") {
                     doc.addPage();
+                    currentY = 20;
                 }
-                
-                doc.text("B-SHIFT (Night Shift) – Dispatch Vehicle Wise Planning", 14, startY);
+                doc.text("B-SHIFT (Night Shift) – Dispatch Vehicle Wise Planning", 14, currentY);
+                currentY += 10;
                 
                 const nightTableData = [];
-                for (const customer in customerData) {
-                    const row = [customer, 'No. of Vehicles / Total Tonnage MT'];
+                for (const customer in nightCustomerData) {
+                    const row = [customer];
                     materialTypes.forEach(material => {
-                        row.push(customerData[customer].materials[material].tonnage > 0 ? customerData[customer].materials[material].tonnage.toFixed(2) : '');
+                        row.push(nightCustomerData[customer].materials[material].tonnage > 0 ? nightCustomerData[customer].materials[material].tonnage.toFixed(2) : '');
                     });
-                    row.push(customerData[customer].totalTonnage.toFixed(2));
+                    row.push(nightCustomerData[customer].totalTonnage.toFixed(2));
                     nightTableData.push(row);
                 }
                 
                 doc.autoTable({
-                    head: [['Customer Name', 'Unit', ...materialTypes, 'TOTAL']],
+                    head: [['Customer Name', ...materialTypes, 'TOTAL']],
                     body: nightTableData,
-                    startY: startY + 10,
+                    startY: currentY,
                     styles: { fontSize: 8 },
                     headStyles: { fillColor: [44, 62, 80] },
                     alternateRowStyles: { fillColor: [240, 240, 240] }
@@ -1499,18 +1727,454 @@
             
             doc.save(`Transport_Bill_${startDate}_to_${endDate}${vehicleNo ? `_${vehicleNo}` : ''}.pdf`);
         }
+
+        function downloadClientPDF() {
+            if (!currentClientReportData) {
+                alert("No report data available to download.");
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const { startDate, endDate, clientDetails, clientData } = currentClientReportData;
+            
+            doc.setFontSize(14);
+            doc.text(`Client Wise Dispatch Bill Report - ${formatDate(startDate)} to ${formatDate(endDate)}${clientDetails ? ` - Client: ${clientDetails}` : ''}`, 14, 20);
+            
+            const tableData = [];
+            
+            for (const client in clientData) {
+                let transactionsStr = '';
+                clientData[client].transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                let currentMonth = '';
+                let monthTrips = 0;
+                let monthNetWt = 0;
+                let monthSaleAmount = 0;
+                let transactionCounter = 1;
+                
+                clientData[client].transactions.forEach(tx => {
+                    const monthYear = getMonthYear(tx.date);
+                    if (monthYear !== currentMonth) {
+                        if (currentMonth) {
+                            transactionsStr += `Month Total: Trips: ${monthTrips}, Net WT: ${monthNetWt.toFixed(2)}, Sale Amount: ${monthSaleAmount.toFixed(2)}\n`;
+                        }
+                        transactionsStr += `${monthYear}\n`;
+                        currentMonth = monthYear;
+                        monthTrips = 0;
+                        monthNetWt = 0;
+                        monthSaleAmount = 0;
+                    }
+                    
+                    transactionsStr += `${transactionCounter++}. Date: ${formatDate(tx.date)}, Slip No: ${tx.weighmentSlipNo}, Material: ${tx.materialType}, Net WT: ${tx.netWt.toFixed(2)}, Rate: ${tx.ratePerTone.toFixed(2)}, Amount: ${tx.saleAmount.toFixed(2)}, Vehicle: ${tx.vehicleNo}\n`;
+                    
+                    monthTrips += 1;
+                    monthNetWt += tx.netWt;
+                    monthSaleAmount += tx.saleAmount;
+                });
+                
+                if (currentMonth) {
+                    transactionsStr += `Month Total: Trips: ${monthTrips}, Net WT: ${monthNetWt.toFixed(2)}, Sale Amount: ${monthSaleAmount.toFixed(2)}\n`;
+                }
+                
+                transactionsStr += `Grand Total: Trips: ${clientData[client].totalTrips}, Net WT: ${clientData[client].totalNetWt.toFixed(2)}, Sale Amount: ${clientData[client].totalSaleAmount.toFixed(2)}`;
+                
+                tableData.push([client, clientData[client].totalTrips, clientData[client].totalNetWt.toFixed(2), clientData[client].totalSaleAmount.toFixed(2), transactionsStr]);
+            }
+            
+            doc.autoTable({
+                head: [['Client Details', 'Total Trips', 'Total NET WT (MT)', 'Total Sale Amount', 'Transaction Details']],
+                body: tableData,
+                startY: 30,
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [44, 62, 80] },
+                alternateRowStyles: { fillColor: [240, 240, 240] }
+            });
+            
+            doc.save(`Client_Dispatch_Bill_${startDate}_to_${endDate}${clientDetails ? `_${clientDetails.replace(/\s+/g, '_')}` : ''}.pdf`);
+        }
+        
+        function downloadDispatchExcel() {
+            if (!currentDispatchReportData) {
+                alert("No report data available to download.");
+                return;
+            }
+            
+            const { date, shift, customerData, materialTypes } = currentDispatchReportData;
+            
+            const excelData = [];
+            excelData.push([`${shift === "ALL" ? "FULL DAY" : shift} - Dispatch Vehicle Wise Planning - ${formatDate(date)}`]);
+            excelData.push([]);
+            
+            // Create header row
+            const headerRow = ['Client Details', 'Unit'];
+            materialTypes.forEach(material => headerRow.push(material));
+            headerRow.push('TOTAL');
+            excelData.push(headerRow);
+            
+            // Add customer data
+            for (const customer in customerData) {
+                // Tonnage row
+                const tonnageRow = [customer, 'Total Tonnage (MT)'];
+                materialTypes.forEach(material => {
+                    tonnageRow.push(customerData[customer].materials[material].tonnage > 0 ? customerData[customer].materials[material].tonnage.toFixed(2) : '');
+                });
+                tonnageRow.push(customerData[customer].totalTonnage.toFixed(2));
+                excelData.push(tonnageRow);
+                
+                // Trips row
+                const tripsRow = ['', 'Total Trips'];
+                materialTypes.forEach(material => {
+                    tripsRow.push(customerData[customer].materials[material].trips > 0 ? customerData[customer].materials[material].trips : '');
+                });
+                tripsRow.push(customerData[customer].totalTrips);
+                excelData.push(tripsRow);
+            }
+            
+            // Calculate totals
+            const materialTotals = {};
+            materialTypes.forEach(material => materialTotals[material] = { tonnage: 0, trips: 0 });
+            
+            let grandTotalTonnage = 0, grandTotalTrips = 0;
+            for (const customer in customerData) {
+                materialTypes.forEach(material => {
+                    materialTotals[material].tonnage += customerData[customer].materials[material].tonnage;
+                    materialTotals[material].trips += customerData[customer].materials[material].trips;
+                });
+                grandTotalTonnage += customerData[customer].totalTonnage;
+                grandTotalTrips += customerData[customer].totalTrips;
+            }
+            
+            // Add grand total row
+            const grandTonnageRow = ['GRAND TOTAL', 'Total Tonnage (MT)'];
+            materialTypes.forEach(material => {
+                grandTonnageRow.push(materialTotals[material].tonnage > 0 ? materialTotals[material].tonnage.toFixed(2) : '');
+            });
+            grandTonnageRow.push(grandTotalTonnage.toFixed(2));
+            excelData.push(grandTonnageRow);
+            
+            // Add total trips row
+            const grandTripsRow = ['', 'Total Trips'];
+            materialTypes.forEach(material => {
+                grandTripsRow.push(materialTotals[material].trips > 0 ? materialTotals[material].trips : '');
+            });
+            grandTripsRow.push(grandTotalTrips);
+            excelData.push(grandTripsRow);
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Dispatch Report');
+            
+            // Save file
+            XLSX.writeFile(wb, `Dispatch_Report_${date}_${shift}.xlsx`);
+        }
+        
+        function downloadFtdExcel() {
+            if (!currentFtdReportData) {
+                alert("No report data available to download.");
+                return;
+            }
+            
+            const { date, shift, materialTypes, dayRecords, nightRecords, dayCustomerData, nightCustomerData } = currentFtdReportData;
+            
+            const excelData = [];
+            excelData.push([`FTD Report - ${shift} - ${formatDate(date)}`]);
+            excelData.push([]);
+            
+            // Calculate totals for day and night shifts
+            let dayTotalTonnage = 0;
+            let dayTotalTrips = 0;
+            const dayMaterialTotals = {};
+            materialTypes.forEach(material => dayMaterialTotals[material] = { tonnage: 0, trips: 0 });
+            
+            dayRecords.forEach(record => {
+                dayTotalTonnage += record.netWt;
+                dayTotalTrips += 1;
+                if (dayMaterialTotals[record.materialType]) {
+                    dayMaterialTotals[record.materialType].tonnage += record.netWt;
+                    dayMaterialTotals[record.materialType].trips += 1;
+                }
+            });
+            
+            let nightTotalTonnage = 0;
+            let nightTotalTrips = 0;
+            const nightMaterialTotals = {};
+            materialTypes.forEach(material => nightMaterialTotals[material] = { tonnage: 0, trips: 0 });
+            
+            nightRecords.forEach(record => {
+                nightTotalTonnage += record.netWt;
+                nightTotalTrips += 1;
+                if (nightMaterialTotals[record.materialType]) {
+                    nightMaterialTotals[record.materialType].tonnage += record.netWt;
+                    nightMaterialTotals[record.materialType].trips += 1;
+                }
+            });
+            
+            // Add day shift data if applicable
+            if (shift === "A-SHIFT" || shift === "ALL") {
+                excelData.push(['A-SHIFT (Day Shift) – Dispatch Vehicle Wise Planning']);
+                excelData.push([]);
+                
+                // Create header row
+                const headerRow = ['Customer Name'];
+                materialTypes.forEach(material => headerRow.push(material));
+                headerRow.push('TOTAL');
+                excelData.push(headerRow);
+                
+                // Add customer data
+                for (const customer in dayCustomerData) {
+                    const row = [customer];
+                    materialTypes.forEach(material => {
+                        row.push(dayCustomerData[customer].materials[material].tonnage > 0 ? dayCustomerData[customer].materials[material].tonnage.toFixed(2) : '');
+                    });
+                    row.push(dayCustomerData[customer].totalTonnage.toFixed(2));
+                    excelData.push(row);
+                }
+                
+                // Add day shift totals
+                if (shift === "A-SHIFT") {
+                    const totalRow = [`Total No of Vehicles: ${dayTotalTrips}`];
+                    materialTypes.forEach(material => {
+                        totalRow.push(dayMaterialTotals[material]?.tonnage > 0 ? dayMaterialTotals[material].tonnage.toFixed(2) : '');
+                    });
+                    totalRow.push(dayTotalTonnage.toFixed(2));
+                    excelData.push(totalRow);
+                }
+                
+                excelData.push([]);
+            }
+            
+            // Add night shift data if applicable
+            if (shift === "B-SHIFT" || shift === "ALL") {
+                excelData.push(['B-SHIFT (Night Shift) – Dispatch Vehicle Wise Planning']);
+                excelData.push([]);
+                
+                // Create header row
+                const headerRow = ['Customer Name'];
+                materialTypes.forEach(material => headerRow.push(material));
+                headerRow.push('TOTAL');
+                excelData.push(headerRow);
+                
+                // Add customer data
+                for (const customer in nightCustomerData) {
+                    const row = [customer];
+                    materialTypes.forEach(material => {
+                        row.push(nightCustomerData[customer].materials[material].tonnage > 0 ? nightCustomerData[customer].materials[material].tonnage.toFixed(2) : '');
+                    });
+                    row.push(nightCustomerData[customer].totalTonnage.toFixed(2));
+                    excelData.push(row);
+                }
+                
+                // Add night shift totals
+                if (shift === "B-SHIFT") {
+                    const totalRow = [`Total No of Vehicles: ${nightTotalTrips}`];
+                    materialTypes.forEach(material => {
+                        totalRow.push(nightMaterialTotals[material]?.tonnage > 0 ? nightMaterialTotals[material].tonnage.toFixed(2) : '');
+                    });
+                    totalRow.push(nightTotalTonnage.toFixed(2));
+                    excelData.push(totalRow);
+                }
+                
+                excelData.push([]);
+            }
+            
+            // Add summary for FULL DAY report
+            if (shift === "ALL") {
+                excelData.push(['Summary']);
+                excelData.push([]);
+                
+                // Create header row
+                const headerRow = ['Shift', 'No of Vehicles'];
+                materialTypes.forEach(material => headerRow.push(material));
+                headerRow.push('Grand Total MT');
+                excelData.push(headerRow);
+                
+                // Day shift summary
+                const dayRow = ['Day Shift Total', dayTotalTrips];
+                materialTypes.forEach(material => {
+                    dayRow.push(dayMaterialTotals[material]?.tonnage > 0 ? dayMaterialTotals[material].tonnage.toFixed(2) : '');
+                });
+                dayRow.push(dayTotalTonnage.toFixed(2));
+                excelData.push(dayRow);
+                
+                // Night shift summary
+                const nightRow = ['Night Shift Total', nightTotalTrips];
+                materialTypes.forEach(material => {
+                    nightRow.push(nightMaterialTotals[material]?.tonnage > 0 ? nightMaterialTotals[material].tonnage.toFixed(2) : '');
+                });
+                nightRow.push(nightTotalTonnage.toFixed(2));
+                excelData.push(nightRow);
+                
+                // Combined totals
+                const combinedTotalTonnage = dayTotalTonnage + nightTotalTonnage;
+                const combinedTotalTrips = dayTotalTrips + nightTotalTrips;
+                
+                const combinedRow = ['Combined Total (Day + Night)', combinedTotalTrips];
+                materialTypes.forEach(material => {
+                    const tonnage = (dayMaterialTotals[material]?.tonnage || 0) + (nightMaterialTotals[material]?.tonnage || 0);
+                    combinedRow.push(tonnage > 0 ? tonnage.toFixed(2) : '');
+                });
+                combinedRow.push(combinedTotalTonnage.toFixed(2));
+                excelData.push(combinedRow);
+                
+                excelData.push([]);
+                excelData.push(['Overall Grand Total Vehicles:', combinedTotalTrips]);
+                excelData.push(['Overall Grand Total MT:', combinedTotalTonnage.toFixed(2)]);
+                
+                // Calculate cash and credit sales
+                let totalCashSale = 0;
+                let totalCreditSale = 0;
+                
+                allRecords.filter(record => record.date === date).forEach(record => {
+                    if (record.paymentMode === "Cash") {
+                        totalCashSale += record.saleAmount;
+                    } else if (record.paymentMode === "Credit") {
+                        totalCreditSale += record.saleAmount;
+                    }
+                });
+                
+                excelData.push([]);
+                excelData.push(['Total Cash Sale Amount:', `₹${totalCashSale.toFixed(2)}`]);
+                excelData.push(['Total Credit Sale Amount:', `₹${totalCreditSale.toFixed(2)}`]);
+            }
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'FTD Report');
+            
+            // Save file
+            XLSX.writeFile(wb, `FTD_Report_${date}_${shift}.xlsx`);
+        }
+        
+        function downloadTransportExcel() {
+            if (!currentTransportReportData) {
+                alert("No report data available to download.");
+                return;
+            }
+            
+            const { startDate, endDate, vehicleNo, vehicleData } = currentTransportReportData;
+            
+            const excelData = [];
+            excelData.push([`Transport Bill Report - ${formatDate(startDate)} to ${formatDate(endDate)}${vehicleNo ? ` - Vehicle: ${vehicleNo}` : ''}`]);
+            excelData.push([]);
+            
+            // Create header row
+            const headerRow = ['Vehicle No', 'Total Trips', 'Total NET WT (MT)', 'Total Transport Amount', 'Transaction Details'];
+            excelData.push(headerRow);
+            
+            // Add vehicle data
+            for (const vehicle in vehicleData) {
+                const transactions = vehicleData[vehicle].transactions.map(tx =>
+                    `Slip No: ${tx.weighmentSlipNo}, Client: ${tx.clientDetails}, Material: ${tx.materialType}, Net WT: ${tx.netWt.toFixed(2)}, Transport Amount: ${tx.transportAmount.toFixed(2)}`
+                ).join('; ');
+                
+                const row = [
+                    vehicle,
+                    vehicleData[vehicle].totalTrips,
+                    vehicleData[vehicle].totalNetWt.toFixed(2),
+                    vehicleData[vehicle].totalTransportAmount.toFixed(2),
+                    transactions
+                ];
+                excelData.push(row);
+            }
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Transport Bill');
+            
+            // Save file
+            XLSX.writeFile(wb, `Transport_Bill_${startDate}_to_${endDate}${vehicleNo ? `_${vehicleNo}` : ''}.xlsx`);
+        }
+
+        function downloadClientExcel() {
+            if (!currentClientReportData) {
+                alert("No report data available to download.");
+                return;
+            }
+            
+            const { startDate, endDate, clientDetails, clientData } = currentClientReportData;
+            
+            const excelData = [];
+            excelData.push([`Client Wise Dispatch Bill Report - ${formatDate(startDate)} to ${formatDate(endDate)}${clientDetails ? ` - Client: ${clientDetails}` : ''}`]);
+            excelData.push([]);
+            
+            // For each client, add header and totals, then transactions grouped by month
+            for (const client in clientData) {
+                excelData.push([`Client: ${client}`]);
+                excelData.push(['Total Trips', clientData[client].totalTrips]);
+                excelData.push(['Total NET WT (MT)', clientData[client].totalNetWt.toFixed(2)]);
+                excelData.push(['Total Sale Amount', clientData[client].totalSaleAmount.toFixed(2)]);
+                excelData.push([]);
+                
+                excelData.push(['Transactions:']);
+                const transHeader = ['Date', 'Slip No', 'Material', 'Net WT', 'Rate', 'Amount', 'Vehicle'];
+                excelData.push(transHeader);
+                
+                // Sort transactions by date
+                clientData[client].transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                let currentMonth = '';
+                let monthTrips = 0;
+                let monthNetWt = 0;
+                let monthSaleAmount = 0;
+                
+                clientData[client].transactions.forEach(tx => {
+                    const monthYear = getMonthYear(tx.date);
+                    if (monthYear !== currentMonth) {
+                        if (currentMonth) {
+                            // Add month total
+                            excelData.push(['Month Total:', '', '', monthTrips, '', monthNetWt.toFixed(2), monthSaleAmount.toFixed(2), '']);
+                        }
+                        excelData.push([monthYear]);
+                        currentMonth = monthYear;
+                        monthTrips = 0;
+                        monthNetWt = 0;
+                        monthSaleAmount = 0;
+                    }
+                    
+                    excelData.push([formatDate(tx.date), tx.weighmentSlipNo, tx.materialType, tx.netWt.toFixed(2), tx.ratePerTone.toFixed(2), tx.saleAmount.toFixed(2), tx.vehicleNo]);
+                    
+                    monthTrips += 1;
+                    monthNetWt += tx.netWt;
+                    monthSaleAmount += tx.saleAmount;
+                });
+                
+                // Add last month total
+                if (currentMonth) {
+                    excelData.push(['Month Total:', '', '', monthTrips, '', monthNetWt.toFixed(2), monthSaleAmount.toFixed(2), '']);
+                }
+                
+                // Add grand total
+                excelData.push(['Grand Total:', '', '', clientData[client].totalTrips, '', clientData[client].totalNetWt.toFixed(2), clientData[client].totalSaleAmount.toFixed(2), '']);
+                excelData.push([]);
+                excelData.push([]);
+            }
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Client Dispatch Bill');
+            
+            // Save file
+            XLSX.writeFile(wb, `Client_Dispatch_Bill_${startDate}_to_${endDate}${clientDetails ? `_${clientDetails.replace(/\s+/g, '_')}` : ''}.xlsx`);
+        }
         
         function exportToExcel() {
             const ws = XLSX.utils.json_to_sheet(allRecords.map(record => ({
                 'S.No': allRecords.indexOf(record) + 1,
                 'Accounting Date': record.accountingDate,
                 'Date': record.date,
+                'Shift': record.shift,
                 'Weighment Slip No': record.weighmentSlipNo,
                 'DC No': record.deliveryChallanNo,
                 'Royalty Permit No': record.royaltyPermitNo,
                 'Permit Qty (CM)': record.permitQty.toFixed(2),
                 'Client Details': record.clientDetails,
                 'Payment Terms': record.paymentMode,
+                'Transport Type': record.transportType,
                 'Vehicle No': record.vehicleNo,
                 'Material': record.materialType,
                 'Gross WT': record.grossWt.toFixed(2),
