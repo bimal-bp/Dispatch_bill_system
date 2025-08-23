@@ -155,6 +155,55 @@
             background-color: #333;
             color: white;
         }
+        .ftd-report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .ftd-report-table th, .ftd-report-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .ftd-report-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .ftd-customer-row {
+            background-color: #e6f2ff;
+            font-weight: bold;
+        }
+        .ftd-total-row {
+            background-color: #d4edda;
+            font-weight: bold;
+        }
+        .ftd-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+        .ftd-summary-table th, .ftd-summary-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .ftd-summary-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .ftd-summary-total {
+            background-color: #d4edda;
+            font-weight: bold;
+        }
+        .transaction-points {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            text-align: left;
+        }
+        .transaction-point {
+            padding: 3px 0;
+        }
     </style>
 </head>
 <body>
@@ -431,9 +480,9 @@
             <div class="col-md-3">
                 <label for="ftdReportShift" class="form-label">Select Shift</label>
                 <select class="form-select" id="ftdReportShift">
-                    <option value="A-SHIFT">A-SHIFT</option>
-                    <option value="B-SHIFT">B-SHIFT</option>
-                    <option value="ALL">FULL DAY</option>
+                    <option value="DAY">DAY</option>
+                    <option value="NIGHT">NIGHT</option>
+                    <option value="FULL DAY">FULL DAY</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -982,9 +1031,11 @@
                 return;
             }
             
-            let dateRecords = reportShift === "ALL" ?
+            let dateRecords = reportShift === "FULL DAY" ?
                 allRecords.filter(record => record.date === reportDate) :
-                allRecords.filter(record => record.date === reportDate && record.shift === reportShift);
+                allRecords.filter(record => record.date === reportDate && 
+                    ((reportShift === "DAY" && record.shift === "A-SHIFT") || 
+                     (reportShift === "NIGHT" && record.shift === "B-SHIFT")));
             
             if (dateRecords.length === 0) {
                 alert("No records found for the selected criteria.");
@@ -992,112 +1043,221 @@
                 return;
             }
             
-            // Group by month and vehicle
-            const monthData = {};
+            // Group by customer and material
+            const customerData = {};
+            const materialTypes = ["10 MM", "20 MM", "V/SAND", "Scalping", "P/Sand", "40MM", "GSB/WET MIX", "R/Sand"];
             
             dateRecords.forEach(record => {
-                const date = new Date(record.date);
-                const monthYear = `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
-                
-                if (!monthData[monthYear]) {
-                    monthData[monthYear] = {};
-                }
-                
-                if (!monthData[monthYear][record.vehicleNo]) {
-                    monthData[monthYear][record.vehicleNo] = {
+                if (!customerData[record.clientDetails]) {
+                    customerData[record.clientDetails] = {
+                        totalTonnage: 0,
                         totalTrips: 0,
-                        totalNetWt: 0,
-                        totalTransportAmount: 0,
+                        materials: {},
                         transactions: []
                     };
+                    materialTypes.forEach(material => {
+                        customerData[record.clientDetails].materials[material] = { tonnage: 0, trips: 0 };
+                    });
                 }
                 
-                monthData[monthYear][record.vehicleNo].totalTrips += 1;
-                monthData[monthYear][record.vehicleNo].totalNetWt += record.netWt;
-                monthData[monthYear][record.vehicleNo].totalTransportAmount += record.transportAmount;
-                monthData[monthYear][record.vehicleNo].transactions.push({
+                customerData[record.clientDetails].totalTonnage += record.netWt;
+                customerData[record.clientDetails].totalTrips += 1;
+                
+                if (customerData[record.clientDetails].materials[record.materialType]) {
+                    customerData[record.clientDetails].materials[record.materialType].tonnage += record.netWt;
+                    customerData[record.clientDetails].materials[record.materialType].trips += 1;
+                }
+                
+                // Add transaction details
+                customerData[record.clientDetails].transactions.push({
                     date: record.date,
-                    weighmentSlipNo: record.weighmentSlipNo,
-                    clientDetails: record.clientDetails,
-                    materialType: record.materialType,
+                    slipNo: record.weighmentSlipNo,
+                    client: record.clientDetails,
+                    material: record.materialType,
                     netWt: record.netWt,
-                    transportRate: record.transportRate,
-                    transportAmount: record.transportAmount
+                    rate: record.ratePerTone,
+                    amount: record.saleAmount
                 });
             });
             
-            currentFtdReportData = { date: reportDate, shift: reportShift, monthData };
+            currentFtdReportData = { date: reportDate, shift: reportShift, customerData, materialTypes };
             document.getElementById('ftdReportActions').style.display = 'block';
             
             let reportHTML = '';
+            const formattedDate = formatDate(reportDate);
             
-            // Calculate overall totals
-            let overallTotalTrips = 0;
-            let overallTotalNetWt = 0;
-            let overallTotalTransportAmount = 0;
+            // Calculate totals
+            let dayTotalTonnage = 0;
+            let dayTotalTrips = 0;
+            const dayMaterialTotals = {};
+            materialTypes.forEach(material => dayMaterialTotals[material] = { tonnage: 0, trips: 0 });
             
-            for (const monthYear in monthData) {
-                reportHTML += `<div class="month-header">${monthYear}</div>`;
-                reportHTML += '<table class="table table-bordered">';
-                reportHTML += '<tr class="customer-header"><th>Vehicle No</th><th>Total Trips</th><th>Total NET WT (MT)</th><th>Total Transport Amount</th><th>Transaction Details</th></tr>';
+            let nightTotalTonnage = 0;
+            let nightTotalTrips = 0;
+            const nightMaterialTotals = {};
+            materialTypes.forEach(material => nightMaterialTotals[material] = { tonnage: 0, trips: 0 });
+            
+            // Separate day and night shifts
+            const dayRecords = allRecords.filter(record => record.date === reportDate && record.shift === "A-SHIFT");
+            const nightRecords = allRecords.filter(record => record.date === reportDate && record.shift === "B-SHIFT");
+            
+            dayRecords.forEach(record => {
+                dayTotalTonnage += record.netWt;
+                dayTotalTrips += 1;
+                if (dayMaterialTotals[record.materialType]) {
+                    dayMaterialTotals[record.materialType].tonnage += record.netWt;
+                    dayMaterialTotals[record.materialType].trips += 1;
+                }
+            });
+            
+            nightRecords.forEach(record => {
+                nightTotalTonnage += record.netWt;
+                nightTotalTrips += 1;
+                if (nightMaterialTotals[record.materialType]) {
+                    nightMaterialTotals[record.materialType].tonnage += record.netWt;
+                    nightMaterialTotals[record.materialType].trips += 1;
+                }
+            });
+            
+            // Calculate combined totals
+            const combinedTotalTonnage = dayTotalTonnage + nightTotalTonnage;
+            const combinedTotalTrips = dayTotalTrips + nightTotalTrips;
+            const combinedMaterialTotals = {};
+            materialTypes.forEach(material => {
+                combinedMaterialTotals[material] = {
+                    tonnage: (dayMaterialTotals[material]?.tonnage || 0) + (nightMaterialTotals[material]?.tonnage || 0),
+                    trips: (dayMaterialTotals[material]?.trips || 0) + (nightMaterialTotals[material]?.trips || 0)
+                };
+            });
+            
+            // Calculate cash and credit sales
+            let totalCashSale = 0;
+            let totalCreditSale = 0;
+            
+            dateRecords.forEach(record => {
+                if (record.paymentMode === "Cash") {
+                    totalCashSale += record.saleAmount;
+                } else if (record.paymentMode === "Credit") {
+                    totalCreditSale += record.saleAmount;
+                }
+            });
+            
+            // Generate report based on selected shift
+            if (reportShift === "DAY" || reportShift === "FULL DAY") {
+                reportHTML += `<div class="section-header">A-SHIFT (Day Shift) – Dispatch Vehicle Wise Planning</div>`;
+                reportHTML += `<table class="ftd-report-table">`;
+                reportHTML += `<thead><tr><th>Customer Name</th><th>Unit</th>`;
+                materialTypes.forEach(material => reportHTML += `<th>${material}</th>`);
+                reportHTML += `<th>TOTAL</th></tr></thead><tbody>`;
                 
-                // Calculate month totals
-                let monthTotalTrips = 0;
-                let monthTotalNetWt = 0;
-                let monthTotalTransportAmount = 0;
-                
-                for (const vehicle in monthData[monthYear]) {
-                    const vehicleData = monthData[monthYear][vehicle];
-                    monthTotalTrips += vehicleData.totalTrips;
-                    monthTotalNetWt += vehicleData.totalNetWt;
-                    monthTotalTransportAmount += vehicleData.totalTransportAmount;
-                    
-                    reportHTML += `<tr class="vehicle-row">
-                        <td style="font-weight: bold;">${vehicle}</td>
-                        <td class="number-cell">${vehicleData.totalTrips}</td>
-                        <td class="number-cell">${vehicleData.totalNetWt.toFixed(2)}</td>
-                        <td class="number-cell">${vehicleData.totalTransportAmount.toFixed(2)}</td>
-                        <td class="transaction-details">`;
-                    
-                    vehicleData.transactions.forEach(tx => {
-                        reportHTML += `<div class="transaction-row">
-                            Date: ${formatDate(tx.date)}, Slip No: ${tx.weighmentSlipNo}, 
-                            Client: ${tx.clientDetails}, Material: ${tx.materialType}, 
-                            Net WT: ${tx.netWt.toFixed(2)} MT, Rate: ${tx.transportRate.toFixed(2)}, 
-                            Amount: ${tx.transportAmount.toFixed(2)}
-                        </div>`;
-                    });
-                    
-                    reportHTML += `</td></tr>`;
+                // Add day shift customer data
+                for (const customer in customerData) {
+                    const hasDayRecords = dayRecords.some(record => record.clientDetails === customer);
+                    if (hasDayRecords) {
+                        reportHTML += `<tr class="ftd-customer-row"><td>${customer}</td><td>No. of Vehicles / Total Tonnage MT</td>`;
+                        materialTypes.forEach(material => {
+                            const tonnage = customerData[customer].materials[material].tonnage;
+                            reportHTML += `<td>${tonnage > 0 ? tonnage.toFixed(2) : ''}</td>`;
+                        });
+                        reportHTML += `<td>${customerData[customer].totalTonnage.toFixed(2)}</td></tr>`;
+                    }
                 }
                 
-                // Add month totals
-                reportHTML += `<tr class="month-total">
-                    <td>${monthYear} TOTAL</td>
-                    <td class="number-cell">${monthTotalTrips}</td>
-                    <td class="number-cell">${monthTotalNetWt.toFixed(2)}</td>
-                    <td class="number-cell">${monthTotalTransportAmount.toFixed(2)}</td>
-                    <td></td>
-                </tr>`;
-                
-                reportHTML += '</table>';
-                
-                // Add to overall totals
-                overallTotalTrips += monthTotalTrips;
-                overallTotalNetWt += monthTotalNetWt;
-                overallTotalTransportAmount += monthTotalTransportAmount;
+                // Add day shift totals
+                reportHTML += `<tr class="ftd-total-row"><td colspan="2">Total No of Vehicles: ${dayTotalTrips}</td>`;
+                materialTypes.forEach(material => {
+                    reportHTML += `<td>${dayMaterialTotals[material]?.tonnage > 0 ? dayMaterialTotals[material].tonnage.toFixed(2) : ''}</td>`;
+                });
+                reportHTML += `<td>${dayTotalTonnage.toFixed(2)}</td></tr>`;
+                reportHTML += `</tbody></table>`;
             }
             
-            // Add grand total
-            reportHTML += `<table class="table table-bordered">`;
-            reportHTML += `<tr class="grand-total">
-                <td>GRAND TOTAL</td>
-                <td class="number-cell">${overallTotalTrips}</td>
-                <td class="number-cell">${overallTotalNetWt.toFixed(2)}</td>
-                <td class="number-cell">${overallTotalTransportAmount.toFixed(2)}</td>
-                <td></td>
-            </tr>`;
-            reportHTML += `</table>`;
+            if (reportShift === "NIGHT" || reportShift === "FULL DAY") {
+                reportHTML += `<div class="section-header">B-SHIFT (Night Shift) – Dispatch Vehicle Wise Planning</div>`;
+                reportHTML += `<table class="ftd-report-table">`;
+                reportHTML += `<thead><tr><th>Customer Name</th><th>Unit</th>`;
+                materialTypes.forEach(material => reportHTML += `<th>${material}</th>`);
+                reportHTML += `<th>TOTAL</th></tr></thead><tbody>`;
+                
+                // Add night shift customer data
+                for (const customer in customerData) {
+                    const hasNightRecords = nightRecords.some(record => record.clientDetails === customer);
+                    if (hasNightRecords) {
+                        reportHTML += `<tr class="ftd-customer-row"><td>${customer}</td><td>No. of Vehicles / Total Tonnage MT</td>`;
+                        materialTypes.forEach(material => {
+                            const tonnage = customerData[customer].materials[material].tonnage;
+                            reportHTML += `<td>${tonnage > 0 ? tonnage.toFixed(2) : ''}</td>`;
+                        });
+                        reportHTML += `<td>${customerData[customer].totalTonnage.toFixed(2)}</td></tr>`;
+                    }
+                }
+                
+                // Add night shift totals
+                reportHTML += `<tr class="ftd-total-row"><td colspan="2">Total No of Vehicles: ${nightTotalTrips}</td>`;
+                materialTypes.forEach(material => {
+                    reportHTML += `<td>${nightMaterialTotals[material]?.tonnage > 0 ? nightMaterialTotals[material].tonnage.toFixed(2) : ''}</td>`;
+                });
+                reportHTML += `<td>${nightTotalTonnage.toFixed(2)}</td></tr>`;
+                reportHTML += `</tbody></table>`;
+            }
+            
+            // Add summary table for FULL DAY report
+            if (reportShift === "FULL DAY") {
+                reportHTML += `<div class="section-header">Summary</div>`;
+                reportHTML += `<table class="ftd-summary-table">`;
+                reportHTML += `<thead><tr><th>Shift</th><th>No of Vehicles</th>`;
+                materialTypes.forEach(material => reportHTML += `<th>${material}</th>`);
+                reportHTML += `<th>Grand Total MT</th></tr></thead><tbody>`;
+                
+                // Day shift summary
+                reportHTML += `<tr><td>Day Shift Total</td><td>${dayTotalTrips}</td>`;
+                materialTypes.forEach(material => {
+                    reportHTML += `<td>${dayMaterialTotals[material]?.tonnage > 0 ? dayMaterialTotals[material].tonnage.toFixed(2) : ''}</td>`;
+                });
+                reportHTML += `<td>${dayTotalTonnage.toFixed(2)}</td></tr>`;
+                
+                // Night shift summary
+                reportHTML += `<tr><td>Night Shift Total</td><td>${nightTotalTrips}</td>`;
+                materialTypes.forEach(material => {
+                    reportHTML += `<td>${nightMaterialTotals[material]?.tonnage > 0 ? nightMaterialTotals[material].tonnage.toFixed(2) : ''}</td>`;
+                });
+                reportHTML += `<td>${nightTotalTonnage.toFixed(2)}</td></tr>`;
+                
+                // Combined totals
+                reportHTML += `<tr class="ftd-summary-total"><td>Combined Total (Day + Night)</td><td>${combinedTotalTrips}</td>`;
+                materialTypes.forEach(material => {
+                    reportHTML += `<td>${combinedMaterialTotals[material]?.tonnage > 0 ? combinedMaterialTotals[material].tonnage.toFixed(2) : ''}</td>`;
+                });
+                reportHTML += `<td>${combinedTotalTonnage.toFixed(2)}</td></tr>`;
+                
+                // Overall grand total
+                reportHTML += `<tr class="ftd-summary-total"><td colspan="2">Overall Grand Total Vehicles: ${combinedTotalTrips}</td>`;
+                reportHTML += `<td colspan="${materialTypes.length}">Overall Grand Total MT: ${combinedTotalTonnage.toFixed(2)}</td>`;
+                reportHTML += `<td></td></tr>`;
+                
+                // Cash and credit sales
+                reportHTML += `<tr class="ftd-summary-total"><td colspan="2">Total Cash Sale Amount: ₹${totalCashSale.toFixed(2)}</td>`;
+                reportHTML += `<td colspan="${materialTypes.length}">Total Credit Sale Amount: ₹${totalCreditSale.toFixed(2)}</td>`;
+                reportHTML += `<td></td></tr>`;
+                
+                reportHTML += `</tbody></table>`;
+            }
+            
+            // Add transaction details in point format
+            reportHTML += `<div class="section-header">Transaction Details</div>`;
+            reportHTML += `<div class="transaction-details">`;
+            
+            for (const customer in customerData) {
+                reportHTML += `<div class="transaction-points">`;
+                customerData[customer].transactions.forEach(tx => {
+                    reportHTML += `<div class="transaction-point">`;
+                    reportHTML += `Date: ${formatDate(tx.date)}, Slip No: ${tx.slipNo}, Client: ${tx.client}, Material: ${tx.material}, Net WT: ${tx.netWt.toFixed(2)} MT, Rate: ${tx.rate.toFixed(2)}, Amount: ${tx.amount.toFixed(2)}`;
+                    reportHTML += `</div>`;
+                });
+                reportHTML += `</div>`;
+            }
+            
+            reportHTML += `</div>`;
             
             document.getElementById('ftdReportContainer').innerHTML = reportHTML;
         }
@@ -1245,56 +1405,61 @@
             
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            const { date, shift, monthData } = currentFtdReportData;
+            const { date, shift, customerData, materialTypes } = currentFtdReportData;
             
             doc.setFontSize(14);
-            doc.text(`${shift === "ALL" ? "FULL DAY" : shift} - FTD Report - ${formatDate(date)}`, 14, 20);
+            doc.text(`FTD Report - ${shift} - ${formatDate(date)}`, 14, 20);
             
-            let startY = 30;
-            
-            for (const monthYear in monthData) {
-                doc.setFontSize(12);
-                doc.text(monthYear, 14, startY);
-                startY += 10;
+            // Add content based on shift selection
+            if (shift === "DAY" || shift === "FULL DAY") {
+                doc.text("A-SHIFT (Day Shift) – Dispatch Vehicle Wise Planning", 14, 30);
                 
-                const tableData = [];
-                let monthTotalTrips = 0;
-                let monthTotalNetWt = 0;
-                let monthTotalTransportAmount = 0;
-                
-                for (const vehicle in monthData[monthYear]) {
-                    const vehicleData = monthData[monthYear][vehicle];
-                    monthTotalTrips += vehicleData.totalTrips;
-                    monthTotalNetWt += vehicleData.totalNetWt;
-                    monthTotalTransportAmount += vehicleData.totalTransportAmount;
-                    
-                    const transactions = vehicleData.transactions.map(tx =>
-                        `Date: ${formatDate(tx.date)}, Slip: ${tx.weighmentSlipNo}, Client: ${tx.clientDetails}, Material: ${tx.materialType}, Net WT: ${tx.netWt.toFixed(2)} MT, Rate: ${tx.transportRate.toFixed(2)}, Amount: ${tx.transportAmount.toFixed(2)}`
-                    ).join('\n');
-                    
-                    tableData.push([vehicle, vehicleData.totalTrips, vehicleData.totalNetWt.toFixed(2), vehicleData.totalTransportAmount.toFixed(2), transactions]);
+                const dayTableData = [];
+                for (const customer in customerData) {
+                    const row = [customer, 'No. of Vehicles / Total Tonnage MT'];
+                    materialTypes.forEach(material => {
+                        row.push(customerData[customer].materials[material].tonnage > 0 ? customerData[customer].materials[material].tonnage.toFixed(2) : '');
+                    });
+                    row.push(customerData[customer].totalTonnage.toFixed(2));
+                    dayTableData.push(row);
                 }
                 
                 doc.autoTable({
-                    head: [['Vehicle No', 'Total Trips', 'Total NET WT (MT)', 'Total Transport Amount', 'Transaction Details']],
-                    body: tableData,
-                    startY: startY,
+                    head: [['Customer Name', 'Unit', ...materialTypes, 'TOTAL']],
+                    body: dayTableData,
+                    startY: 40,
                     styles: { fontSize: 8 },
                     headStyles: { fillColor: [44, 62, 80] },
                     alternateRowStyles: { fillColor: [240, 240, 240] }
                 });
+            }
+            
+            if (shift === "NIGHT" || shift === "FULL DAY") {
+                const startY = shift === "FULL DAY" ? doc.lastAutoTable.finalY + 20 : 40;
+                if (shift === "FULL DAY") {
+                    doc.addPage();
+                }
                 
-                startY = doc.lastAutoTable.finalY + 15;
+                doc.text("B-SHIFT (Night Shift) – Dispatch Vehicle Wise Planning", 14, startY);
                 
-                // Add month total
+                const nightTableData = [];
+                for (const customer in customerData) {
+                    const row = [customer, 'No. of Vehicles / Total Tonnage MT'];
+                    materialTypes.forEach(material => {
+                        row.push(customerData[customer].materials[material].tonnage > 0 ? customerData[customer].materials[material].tonnage.toFixed(2) : '');
+                    });
+                    row.push(customerData[customer].totalTonnage.toFixed(2));
+                    nightTableData.push(row);
+                }
+                
                 doc.autoTable({
-                    body: [[monthYear + ' TOTAL', monthTotalTrips, monthTotalNetWt.toFixed(2), monthTotalTransportAmount.toFixed(2), '']],
-                    startY: startY,
-                    styles: { fontSize: 8, fillColor: [230, 247, 255] },
-                    headStyles: { fillColor: [44, 62, 80] }
+                    head: [['Customer Name', 'Unit', ...materialTypes, 'TOTAL']],
+                    body: nightTableData,
+                    startY: startY + 10,
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [44, 62, 80] },
+                    alternateRowStyles: { fillColor: [240, 240, 240] }
                 });
-                
-                startY = doc.lastAutoTable.finalY + 15;
             }
             
             doc.save(`FTD_Report_${date}_${shift}.pdf`);
